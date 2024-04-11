@@ -12,6 +12,8 @@ return [
   // -----------------------------
   'can_user_change_capacity' => TRUE,
   // -----------------------------
+  'kita_has_higher_priority' => TRUE,
+  // -----------------------------
   'preference_specific_scope' => TRUE,
   // MANUEL POINTS
   'manual_points' => TRUE,

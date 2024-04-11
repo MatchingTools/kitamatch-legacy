@@ -326,35 +326,11 @@ class PreferenceController extends Controller
 
     if ($applicant->alternative_scope == 1 and $applicant->alternative_start == 1) {
       // both: yes
-      $sorted = $this->array_orderby(
-        $preference_list,
-        'scope_rank', SORT_ASC, //scope is first priority, then ->Start and last ->program
-        'start', SORT_ASC,
-        'program_rank', SORT_ASC
-      );
+      $sorted = $this->sortPreferenceListBasedOnCondition($preference_list);
 
     } elseif ($applicant->alternative_scope == 1 and $applicant->alternative_start == 0) {
       // alternative_scope: yes, alternative_start: no
-      /*$care_start = $applicant->care_start;
-      $filtered = array_filter(
-        $preference_list,
-        function ($var) use ($care_start)  {
-          return ($var['start'] == $care_start);
-        }
-      );
-
-      $sorted = $this->array_orderby(
-        $filtered,
-        'scope_rank', SORT_ASC,
-        'program_rank', SORT_ASC
-      );*/
-
-      $sorted = $this->array_orderby(
-        $preference_list,
-        'scope_rank', SORT_ASC,
-        'start', SORT_ASC,
-        'program_rank', SORT_ASC
-      );
+      $sorted = $this->sortPreferenceListBasedOnCondition($preference_list);
 
     } elseif ($applicant->alternative_scope == 0 and $applicant->alternative_start == 1) {
       // alternative_scope: no, alternative_start: yes
@@ -373,7 +349,6 @@ class PreferenceController extends Controller
 
     } elseif ($applicant->alternative_scope == 0 and $applicant->alternative_start == 0) {
       // alternative_scope: no, alternative_start: no
-
       $care_start = $applicant->care_start;
       $filtered = array_filter(
         $preference_list,
@@ -381,12 +356,6 @@ class PreferenceController extends Controller
           return ($var['scope_is_first'] == 1);
         }
       );
-      /*$filtered = array_filter(
-        $filtered,
-        function ($var) use ($care_start) {
-          return ($var['start'] == $care_start);
-        }
-      );*/
 
       $sorted = $this->array_orderby(
         $filtered,
@@ -396,12 +365,7 @@ class PreferenceController extends Controller
 
     } else {
       // default
-      $sorted = $this->array_orderby(
-        $preference_list,
-        'scope_rank', SORT_ASC,
-        'start', SORT_ASC, // the earlier the better
-        'program_rank', SORT_ASC
-      );
+      $sorted = $this->sortPreferenceListBasedOnCondition($preference_list);
     }
 
     $i = 1;
@@ -425,6 +389,24 @@ class PreferenceController extends Controller
       $this->store($request);
 
       $i = $i + 1;
+    }
+  }
+
+  function sortPreferenceListBasedOnCondition($preference_list) {
+    if (config('kitamatch_config.kita_has_higher_priority')) {
+        return $this->array_orderby(
+            $preference_list,
+            'program_rank', SORT_ASC, //kita has higher priority
+            'scope_rank', SORT_ASC,
+            'start', SORT_ASC
+        );
+    } else {
+        return $this->array_orderby(
+            $preference_list,
+            'scope_rank', SORT_ASC, //scope is first priority, then ->Start and last ->program
+            'start', SORT_ASC,
+            'program_rank', SORT_ASC
+        );
     }
   }
 
