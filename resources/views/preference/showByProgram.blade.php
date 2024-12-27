@@ -15,7 +15,7 @@
 
     <div class="col-md-10 my-3 p-3 bg-white rounded box-shadow">
         <h4>Präferenzliste</h4>
-        <h5>Gehaltene Plätze / Platzkapazität (freie Plätze): {{$program->currentOffers}} / {{$program->capacity}}</h5>
+        <h5>Gehaltene Plätze / Platzkapazität (Plätze): {{$program->currentOffers}} / {{$program->capacity}}</h5>
 
         <div style="float: right;">
         <h5><span class="badge badge-success">Erfolgreiches Angebot</span>

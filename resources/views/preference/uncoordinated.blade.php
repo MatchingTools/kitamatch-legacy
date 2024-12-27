@@ -66,7 +66,7 @@
             <th scope="col">Quartal</th>
             <th scope="col">Umfang</th>
             <th scope="col">Angebote</th>
-            <th scope="col">Freie Plätze</th>
+            <th scope="col">Plätze</th>
             <th scope="col">Bewerber</th>
           </tr>
         </thead>

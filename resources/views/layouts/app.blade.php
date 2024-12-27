@@ -63,7 +63,7 @@
 
         <footer class="text-muted">
           <div class="container">
-            <p class="float-right">2023 © Marktdesign, Zentrum für Europäische Wirtschaftsforschung</p>
+            <p class="float-right">2025 © Marktdesign, Zentrum für Europäische Wirtschaftsforschung</p>
             </p>
           </div>
         </footer>

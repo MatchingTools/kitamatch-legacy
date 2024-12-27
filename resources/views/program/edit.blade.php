@@ -55,7 +55,7 @@
 
             <!-- Email but with user-table! -->
 
-            Freie Plätze
+            Plätze
             @foreach (config('kitamatch_config.care_starts') as $care_start_key => $care_start)
               @foreach (config('kitamatch_config.care_scopes') as $care_scope_key => $care_scope)
                 @if ($care_start_key != -1 and $care_scope_key != -1)
