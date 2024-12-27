@@ -8,7 +8,9 @@ return [
   ],
   'automated_matching_cron' => '*/1 * * * *',
   // -----------------------------
-  'show_gender' => FALSE,
+  'show_gender' => FALSE,  
+  // -----------------------------
+  'show_sibling' => FALSE,
   // -----------------------------
   'can_user_change_capacity' => TRUE,
   // -----------------------------

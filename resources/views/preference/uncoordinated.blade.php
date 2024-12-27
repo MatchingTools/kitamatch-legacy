@@ -320,8 +320,10 @@
               @if (config('kitamatch_config.show_gender'))
               <th>Geschlecht</th>
               @endif
+              @if (config('kitamatch_config.show_sibling'))
               <th>Geschwister betreut</th>
               <th>Geschwister angemeldet</th>
+              @endif
               @if (config('kitamatch_config.manual_points'))
               <th>Punktzahl</th>
               @endif
@@ -354,8 +356,10 @@
                 @if (config('kitamatch_config.show_gender'))
                 <td>{{$applicant->gender}}</td>
                 @endif
+                @if (config('kitamatch_config.show_sibling'))
                 <td>{{$applicant->siblingsIsPresent}}</td>
                 <td>{{$applicant->sibling_applicant_id_1}}-{{$applicant->sibling_applicant_id_2}}-{{$applicant->sibling_applicant_id_3}}</td>
+                @endif
                 <td>{{$applicant->points}}</td>
                 @if (config('kitamatch_config.preference_specific_scope'))
                 <td>{{($applicant->prefered_scope)}}</td>
