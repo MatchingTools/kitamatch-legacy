@@ -150,6 +150,9 @@
                     @if (config('kitamatch_config.show_gender'))
                     <th>Geschlecht</th>
                     @endif
+                    <th>Quartal</th>
+                    <th>Umfang</th>
+                    <th>Kitagruppe</th>
                 </tr>
             </thead>
             <tbody>
@@ -160,6 +163,9 @@
                       @if (config('kitamatch_config.show_gender'))
                       <td>{{$nonMatch['gender']}}</td>
                       @endif
+                      <td>{{$nonMatch['care_start']}}</td>
+                      <td>{{$nonMatch['care_scope']}}</td>
+                      <td>{{$nonMatch['age_cohort']}}</td>
                     </tr>
               @endforeach
             </tbody>

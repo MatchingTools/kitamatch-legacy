@@ -55,6 +55,8 @@ class AdminController extends Controller
     foreach ($matches as $match) {
       $applicant = Applicant::where('aid', '=', $match->aid)->first();
       $match->applicant_name = $applicant->first_name . " " . $applicant->last_name;
+      $match->points_manual = $applicant->points_manual;
+      $match->start_date = $applicant->start_date;
       $program = Program::where('pid', '=', $match->pid)->first();
       $provider = Provider::find($program->proid);
       $match->program_name = $program->name;
@@ -103,16 +105,22 @@ class AdminController extends Controller
     $data['applicantsCount'] = count($applicants);
     $data['applicantsVerified'] = count(Applicant::whereIn('status', [22, 25, 26])->get());
     $data['applicantsFinal'] = count(Applicant::where('status', '=', 26)->get());
+    $age_cohorts = config('kitamatch_config.age_cohorts');
+    $scopes = config('kitamatch_config.care_scopes');
+    $starts = config('kitamatch_config.care_starts');
 
     $nonMatches = array();
     foreach ($applicants as $applicant) {
       $filter = DB::table('matches')->where('aid', '=', $applicant->aid)->first();
       if (count($filter) == 0) {
+        $nonMatches[$applicant->aid]['aid'] = $applicant->aid;
         $nonMatches[$applicant->aid]['first_name'] = $applicant->first_name;
         $nonMatches[$applicant->aid]['last_name'] = $applicant->last_name;
         $nonMatches[$applicant->aid]['birthday'] = $applicant->birthday;
-        $nonMatches[$applicant->aid]['gender'] = $applicant->gender;
-        $nonMatches[$applicant->aid]['age_cohort'] = $applicant->age_cohort;
+        $nonMatches[$applicant->aid]['age_cohort'] = $age_cohorts[$applicant->age_cohort];
+        $nonMatches[$applicant->aid]['care_scope'] = $scopes[$applicant->care_scope];
+        $nonMatches[$applicant->aid]['care_start'] = $starts[$applicant->care_start];
+        $nonMatches[$applicant->aid]['points_manual'] = $applicant->points_manual;
       }
     }
     $data['non-matches'] = $nonMatches;
@@ -148,7 +156,7 @@ class AdminController extends Controller
   public function exportAssignedApplicants()
   {
     $matches = $this->listMatchings();
-    $matches_array[] = array('aid','Bewerber','ServiceID','Kita', 'Kitagruppe', 'Status','Umfang', 'Beginn');
+    $matches_array[] = array('ID','Bewerber','Kita', 'Kitagruppe', 'Status', 'Quartal', 'Umfang', 'Beginn', 'Rangordnungspunkte');
 
     $scopes = config('kitamatch_config.care_scopes');
     $starts = config('kitamatch_config.care_starts');
@@ -161,14 +169,15 @@ class AdminController extends Controller
             $scope = $scopes[$id_to_split[2]];
 
       $matches_array[] = array(
-        'BewerberID'=> $match->aid,
-        'Bewerber'=> $match->applicant_name, 
-        'ServiceID'=>$match->pid,
-        'Kita' => $match->provider_name, 
+        'ID'=> $match->aid,
+        'Bewerber'=> $match->applicant_name,
+        'Kita' => $match->provider_name,
         'Kitagruppe' => $match->program_name,
         'Status' => $match->status_text,
+        'Quartal' => $start,
         'Umfang' => $scope,
-        'Beginn' => $start
+        'Beginn' => $match->start_date,
+        'Rangordnungspunkte' => $match->points_manual
       );
 
     };
@@ -183,15 +192,18 @@ class AdminController extends Controller
   public function exportUnassignedApplicants()
   {
     $data = $this->generateDashboard();
-    $nonMatches_array[] = array('Name', 'Geburtsdatum', 'Geschlecht','Age Cohort');
+    $nonMatches_array[] = array('ID', 'Bewerber', 'Geburtsdatum', 'Kitagruppe', 'Quartal', 'Umfang', 'Rangordnungspunkte');
 
     foreach($data['non-matches'] as $nonMatch){
       
       $nonMatches_array[] = array(
-        'Name' => $nonMatch['first_name'].' '.$nonMatch['last_name'],
+        'ID'=> $nonMatch['aid'],
+        'Bewerber' => $nonMatch['first_name'].' '.$nonMatch['last_name'],
         'Geburtsdatum' => $nonMatch['birthday']->format('d.m.Y'),
-        'Geschlecht'=> $nonMatch['gender'],
-        'age_cohort' => $nonMatch['age_cohort'] 
+        'age_cohort' => $nonMatch['age_cohort'],
+        'care_start' => $nonMatch['care_start'],
+        'care_scope' => $nonMatch['care_scope'],
+        'Rangordnungspunkte' => $nonMatch['points_manual']
       );
 
     };
