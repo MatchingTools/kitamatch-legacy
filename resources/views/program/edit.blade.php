@@ -36,7 +36,8 @@
             <div class="form-group row">
                 <label for="name" class="col-sm-2 col-form-label">Gruppenname</label>
                 <div class="col-sm-10">
-                  <input type="text" class="form-control" id="name" name="name" value="{{$program->name}}" disabled>
+                <input type="text" class="form-control" id="name" name="name" value="{{$program->name}}" disabled>
+                <input type="hidden" name="name" value="{{$program->name}}">
                 </div>
             </div>
             <div class="form-group row" style="pointer-events: none; opacity: 0.7;">

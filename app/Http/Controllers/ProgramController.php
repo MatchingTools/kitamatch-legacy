@@ -172,7 +172,9 @@ class ProgramController extends Controller
       $program->p_kind_description = ($program->p_kind == 1) ? "Öffentlich" : "Frei";
       $program->capacity = $this->getAvailableCapacity($program->pid);
       $program->total_offer = $this->getTotalOffer($program->pid);
-      $program->process_complete = ($program->total_offer == $program->capacity) ? "Ja" : "Nein";
+      $program->process_complete = ($program->total_offer == 0 && $program->capacity == 0) 
+        ? '-' 
+        : (($program->total_offer == $program->capacity) ? 'Ja' : 'Nein');
       $totalMatches += $program->total_offer;
       $totalCapacity += $program->capacity;
     }
