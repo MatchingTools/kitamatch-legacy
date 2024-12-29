@@ -33,13 +33,7 @@ use App\Code;
 */
 class AdminController extends Controller
 {
-  /**
-   * Create a new controller instance, handle authentication
-   *
-   * @return void
-   */
-  public function __construct()
-  {
+  public function __construct(){
       $this->middleware('auth');
   }
 
@@ -57,6 +51,18 @@ class AdminController extends Controller
       $match->applicant_name = $applicant->first_name . " " . $applicant->last_name;
       $match->points_manual = $applicant->points_manual;
       $match->start_date = $applicant->start_date;
+      $match->additional_criteria_1 = $applicant->additionalCriteria_1;
+      $match->additional_criteria_2 = $applicant->additionalCriteria_2;
+      $match->additional_criteria_3 = $applicant->additionalCriteria_3;
+      $match->additional_criteria_4 = $applicant->additionalCriteria_4;
+      $match->additional_criteria_5 = $applicant->additionalCriteria_5;
+      $match->additional_criteria_6 = $applicant->additionalCriteria_6;
+      $match->additional_criteria_7 = $applicant->additionalCriteria_7;
+      $match->additional_criteria_8 = $applicant->additionalCriteria_8;
+      $match->additional_criteria_9 = $applicant->additionalCriteria_9;
+      $match->additional_criteria_10 = $applicant->additionalCriteria_10;
+      $match->additional_criteria_11 = $applicant->additionalCriteria_11;
+      $match->additional_criteria_12 = $applicant->additionalCriteria_12;
       $program = Program::where('pid', '=', $match->pid)->first();
       $provider = Provider::find($program->proid);
       $match->program_name = $program->name;
@@ -68,7 +74,7 @@ class AdminController extends Controller
 
       $pid_split = explode("_", $match->pid);
       $pid = $pid_split[0];
-      $match->start = $starts[$pid_split[1]];#
+      $match->start = $starts[$pid_split[1]];
       $match->scope = $scopes[$pid_split[2]];
     }
     return $matches;
@@ -121,6 +127,18 @@ class AdminController extends Controller
         $nonMatches[$applicant->aid]['care_scope'] = $scopes[$applicant->care_scope];
         $nonMatches[$applicant->aid]['care_start'] = $starts[$applicant->care_start];
         $nonMatches[$applicant->aid]['points_manual'] = $applicant->points_manual;
+        $nonMatches[$applicant->aid]['additional_criteria_1'] = $applicant->additionalCriteria_1;
+        $nonMatches[$applicant->aid]['additional_criteria_2'] = $applicant->additionalCriteria_2;
+        $nonMatches[$applicant->aid]['additional_criteria_3'] = $applicant->additionalCriteria_3;
+        $nonMatches[$applicant->aid]['additional_criteria_4'] = $applicant->additionalCriteria_4;
+        $nonMatches[$applicant->aid]['additional_criteria_5'] = $applicant->additionalCriteria_5;
+        $nonMatches[$applicant->aid]['additional_criteria_6'] = $applicant->additionalCriteria_6;
+        $nonMatches[$applicant->aid]['additional_criteria_7'] = $applicant->additionalCriteria_7;
+        $nonMatches[$applicant->aid]['additional_criteria_8'] = $applicant->additionalCriteria_8;
+        $nonMatches[$applicant->aid]['additional_criteria_9'] = $applicant->additionalCriteria_9;
+        $nonMatches[$applicant->aid]['additional_criteria_10'] = $applicant->additionalCriteria_10;
+        $nonMatches[$applicant->aid]['additional_criteria_11'] = $applicant->additionalCriteria_11;
+        $nonMatches[$applicant->aid]['additional_criteria_12'] = $applicant->additionalCriteria_12;
       }
     }
     $data['non-matches'] = $nonMatches;
@@ -156,7 +174,28 @@ class AdminController extends Controller
   public function exportAssignedApplicants()
   {
     $matches = $this->listMatchings();
-    $matches_array[] = array('ID','Bewerber','Kita', 'Kitagruppe', 'Status', 'Quartal', 'Umfang', 'Beginn', 'Rangordnungspunkte');
+    $matches_array[] = array(
+      'ID',
+      'Bewerber',
+      'Kita',
+      'Kitagruppe',
+      'Status',
+      'Quartal',
+      'Umfang',
+      'Beginn',
+      'Rangordnungspunkte',
+      'Zusatzkriterium1',
+      'Zusatzkriterium2',
+      'Zusatzkriterium3',
+      'Zusatzkriterium4',
+      'Zusatzkriterium5',
+      'Zusatzkriterium6',
+      'Zusatzkriterium7',
+      'Zusatzkriterium8',
+      'Zusatzkriterium9',
+      'Zusatzkriterium10',
+      'Zusatzkriterium11',
+      'Zusatzkriterium12');
 
     $scopes = config('kitamatch_config.care_scopes');
     $starts = config('kitamatch_config.care_starts');
@@ -177,9 +216,20 @@ class AdminController extends Controller
         'Quartal' => $start,
         'Umfang' => $scope,
         'Beginn' => $match->start_date,
-        'Rangordnungspunkte' => $match->points_manual
+        'Rangordnungspunkte' => $match->points_manual,
+        'Zusatzkriterium1' => $this->getProviderName($match->additional_criteria_1),
+        'Zusatzkriterium2' => $this->getProviderName($match->additional_criteria_2),
+        'Zusatzkriterium3' => $this->getProviderName($match->additional_criteria_3),
+        'Zusatzkriterium4' => $this->getProviderName($match->additional_criteria_4),
+        'Zusatzkriterium5' => $this->getProviderName($match->additional_criteria_5),
+        'Zusatzkriterium6' => $this->getProviderName($match->additional_criteria_6),
+        'Zusatzkriterium7' => $this->getProviderName($match->additional_criteria_7),
+        'Zusatzkriterium8' => $this->getProviderName($match->additional_criteria_8),
+        'Zusatzkriterium9' => $this->getProviderName($match->additional_criteria_9),
+        'Zusatzkriterium10' => $this->getProviderName($match->additional_criteria_10),
+        'Zusatzkriterium11' => $this->getProviderName($match->additional_criteria_11),
+        'Zusatzkriterium12' => $this->getProviderName($match->additional_criteria_12),
       );
-
     };
     Excel::create('Zuordnungen', function($excel) use($matches_array){
       $excel->setTitle('Zuordnungen');
@@ -192,7 +242,26 @@ class AdminController extends Controller
   public function exportUnassignedApplicants()
   {
     $data = $this->generateDashboard();
-    $nonMatches_array[] = array('ID', 'Bewerber', 'Geburtsdatum', 'Kitagruppe', 'Quartal', 'Umfang', 'Rangordnungspunkte');
+    $nonMatches_array[] = array(
+      'ID',
+      'Bewerber',
+      'Geburtsdatum',
+      'Kitagruppe',
+      'Quartal',
+      'Umfang',
+      'Rangordnungspunkte',
+      'Zusatzkriterium1',
+      'Zusatzkriterium2',
+      'Zusatzkriterium3',
+      'Zusatzkriterium4',
+      'Zusatzkriterium5',
+      'Zusatzkriterium6',
+      'Zusatzkriterium7',
+      'Zusatzkriterium8',
+      'Zusatzkriterium9',
+      'Zusatzkriterium10',
+      'Zusatzkriterium11',
+      'Zusatzkriterium12');
 
     foreach($data['non-matches'] as $nonMatch){
       
@@ -203,9 +272,20 @@ class AdminController extends Controller
         'age_cohort' => $nonMatch['age_cohort'],
         'care_start' => $nonMatch['care_start'],
         'care_scope' => $nonMatch['care_scope'],
-        'Rangordnungspunkte' => $nonMatch['points_manual']
+        'Rangordnungspunkte' => $nonMatch['points_manual'],
+        'Zusatzkriterium1' => $this->getProviderName($nonMatch['additional_criteria_1']),
+        'Zusatzkriterium2' => $this->getProviderName($nonMatch['additional_criteria_2']),
+        'Zusatzkriterium3' => $this->getProviderName($nonMatch['additional_criteria_3']),
+        'Zusatzkriterium4' => $this->getProviderName($nonMatch['additional_criteria_4']),
+        'Zusatzkriterium5' => $this->getProviderName($nonMatch['additional_criteria_5']),
+        'Zusatzkriterium6' => $this->getProviderName($nonMatch['additional_criteria_6']),
+        'Zusatzkriterium7' => $this->getProviderName($nonMatch['additional_criteria_7']),
+        'Zusatzkriterium8' => $this->getProviderName($nonMatch['additional_criteria_8']),
+        'Zusatzkriterium9' => $this->getProviderName($nonMatch['additional_criteria_9']),
+        'Zusatzkriterium10' => $this->getProviderName($nonMatch['additional_criteria_10']),
+        'Zusatzkriterium11' => $this->getProviderName($nonMatch['additional_criteria_11']),
+        'Zusatzkriterium12' => $this->getProviderName($nonMatch['additional_criteria_12'])
       );
-
     };
     Excel::create('Nicht zugeordnete Bewerber', function($excel) use($nonMatches_array){
       $excel->setTitle('Nicht zugeordnete Bewerber');
@@ -215,4 +295,12 @@ class AdminController extends Controller
     })->download('xlsx');
   }
 
+  public function getProviderName($providerId) {
+    if ($providerId == '870') {
+        return '';
+    }
+
+    $provider = Provider::find($providerId);
+    return $provider ? $provider->name : '';
+  }
 }
