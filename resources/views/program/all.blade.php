@@ -46,7 +46,7 @@
                   <td><a href="{{url('/preference/program/' . $program->pid)}}">{{$program->name}}</a></td>
                   <td>{{$program->capacity}}</td>
                   <td>{{$program->total_offer}}</td>
-                  <td>{{$program->process_complete}}</td>
+                  <td style="color: {{ $program->process_complete == 'Ja' ? 'green' : 'red' }};">{{$program->process_complete}}</td>
                   <td>{{$program->p_kind_description}}</td>
                   <td>{{$program->status_description}}</td>
               </tr>
