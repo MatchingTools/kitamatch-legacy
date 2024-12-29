@@ -177,9 +177,9 @@
             </div>
             <div class="col-sm-2">
               @if (!$data['isSet'])
-                <button type="submit" class="btn btn-primary">Hinzufügen</button>
+                <button type="submit" class="btn btn-primary" style="display: none;">Hinzufügen</button>
               @else    
-                <button type="submit" class="btn btn-primary" disabled>Hinzufügen</button>
+                <button type="submit" class="btn btn-primary" style="display: none;" disabled>Hinzufügen</button>
               @endif
             </div>
         </div>

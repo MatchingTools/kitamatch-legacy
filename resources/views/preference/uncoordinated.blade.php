@@ -20,8 +20,6 @@
     })
     });
 
-    //Enable pusher logging - don't include this in production
-    //Pusher.logToConsole = true;
     var pusher = new Pusher('{{ config('broadcasting.connections.pusher.key') }}', {
       cluster: '{{ config('broadcasting.connections.pusher.options.cluster') }}'
     });
@@ -439,12 +437,10 @@
                                 </div>
                                 @endif
                               @endforeach
-
                           </div>
                         </div>
                       </div>
                     </div>
-
 
                     @else
                       <button class="btn btn-danger btn-sm" disabled>kein Angebot verfügbar</button>
