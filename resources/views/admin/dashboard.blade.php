@@ -3,7 +3,6 @@
 @section('content')
 
 <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
-
 <script>
   $(document).ready( function () {
     $('#matches').DataTable( {
@@ -111,22 +110,22 @@
         <table class="table" id="matches">
             <thead>
                 <tr>
+                    <th>Bewerber</th>
                     <th>Kita</th>
+                    <th>Kitagruppe</th>
                     <th>Quartal</th>
                     <th>Umfang</th>
-                    <th>Kitagruppe</th>
-                    <th>Bewerber</th>
                     <th>Status</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach($matches as $match)
                     <tr>
+                      <td><a target="_blank" href="{{url('/applicant/' . $match->aid )}}">{{$match->applicant_name}}</a></td>
                       <td>{{$match->provider_name}}</td>
+                      <td><a target="_blank" href="{{url('/preference/program/' . $match->pid )}}">{{$match->program_name}}</a></td>
                       <td>{{$match->start}}</td>
                       <td>{{$match->scope}}</td>
-                      <td><a target="_blank" href="{{url('/preference/program/' . $match->pid )}}">{{$match->program_name}}</a></td>
-                      <td><a target="_blank" href="{{url('/applicant/' . $match->aid )}}">{{$match->applicant_name}}</a></td>
                       <td>{{$match->status_text}}</td>
                     </tr>
                 @endforeach
@@ -145,14 +144,14 @@
         <table class="table" id="no-match">
             <thead>
                 <tr>
-                    <th>Name</th>
+                    <th>Bewerber</th>
                     <th>Geburtsdatum</th>
                     @if (config('kitamatch_config.show_gender'))
                     <th>Geschlecht</th>
                     @endif
+                    <th>Kitagruppe</th>
                     <th>Quartal</th>
                     <th>Umfang</th>
-                    <th>Kitagruppe</th>
                 </tr>
             </thead>
             <tbody>
@@ -163,9 +162,9 @@
                       @if (config('kitamatch_config.show_gender'))
                       <td>{{$nonMatch['gender']}}</td>
                       @endif
+                      <td>{{$nonMatch['age_cohort']}}</td>
                       <td>{{$nonMatch['care_start']}}</td>
                       <td>{{$nonMatch['care_scope']}}</td>
-                      <td>{{$nonMatch['age_cohort']}}</td>
                     </tr>
               @endforeach
             </tbody>

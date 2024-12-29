@@ -108,14 +108,9 @@
     -->
     </div>
   </div>
-
   <div class="row justify-content-center">
-
     <div class="col-md-12 my-3 p-3 bg-white rounded box-shadow">
-
-    <h4>Verbindliche Angebote <small class="text-muted" style="float: right;"><span class="badge badge-info">Gehaltenes Angebot</span>
-<span class="badge badge-success">Endgültige Zusage</span></small></h4>
-
+    <h4>Verbindliche Angebote <small class="text-muted" style="float: right;"><span class="badge badge-info">Gehaltenes Angebot</span><span class="badge badge-success">Endgültige Zusage</span></small></h4>
     <table class="table" id="offers">
       <thead>
           <tr>
@@ -513,8 +508,10 @@
                 @if (config('kitamatch_config.show_gender'))
                 <td>{{$applicant->gender}}</td>
                 @endif
+                @if (config('kitamatch_config.show_sibling'))
                 <td>{{$applicant->siblingsIsPresent}}</td>
                 <td>{{$applicant->sibling_applicant_id_1}}-{{$applicant->sibling_applicant_id_2}}-{{$applicant->sibling_applicant_id_3}}</td>
+                @endif
                 <td>{{$applicant->points}}</td>
                 @if (config('kitamatch_config.preference_specific_scope'))
                 <td>{{($applicant->prefered_scope)}}</td>

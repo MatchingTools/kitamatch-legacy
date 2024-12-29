@@ -76,9 +76,6 @@ class CapacityController extends Controller
       if (strpos($key, 'capacity_') !== false) {
         $id = substr($key, 9);
         $capacity = Capacity::find($id);
-        // if(($capacity->capacity > $value) && ($data['isSet'] && (Auth::user()->account_type != 5))){
-        //   return back()->withErrors("Sie koennen die Anzahl an freien Plaetzen nur erweitern, nicht reduzieren.");
-        // }
         if(($capacity->capacity > $value) && !(config('kitamatch_config.can_user_change_capacity')) && (Auth::user()->account_type != 5)){
           return back()->withErrors("Sie koennen die Anzahl an freien Plaetzen nur erweitern, nicht reduzieren.");
         }

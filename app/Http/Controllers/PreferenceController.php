@@ -46,8 +46,7 @@ class PreferenceController extends Controller
         $this->middleware('auth');
   }
 
-  public function array_orderby()
-{
+  public function array_orderby(){
     $args = func_get_args();
     $data = array_shift($args);
     foreach ($args as $n => $field) {
@@ -61,7 +60,7 @@ class PreferenceController extends Controller
     $args[] = &$data;
     call_user_func_array('array_multisort', $args);
     return array_pop($args);
-}
+  }
 
   /**
   * Store a single preference
@@ -670,7 +669,6 @@ class PreferenceController extends Controller
         }
 
         $applicant->prefered_scope = $Preference->getPreferenceByApplicantAndProgram($applicant->aid, $pid)->first()->prefered_scope;
-        
       }
       
       $program->openOffers = $openOffers;
@@ -902,40 +900,38 @@ class PreferenceController extends Controller
         if ($key_start >= $applicant->care_start and ($key_scope != -1 and $key_start != -1)) {
           $id_to = $pid . '_' . $key_start . '_' . $key_scope;
 
-    foreach ($applicantsByProgram as $applicant) {
-      //look if preference exists and if it has to be updated
-      $preference = Preference::where('id_from', '=', $program->pid . '_' . $key_start . '_' . $key_scope)
-        ->where('id_to', '=', $applicant->aid)
-        ->where('pr_kind', '=', 2)
-        ->where('status', '=', 1)->first();
+          foreach ($applicantsByProgram as $applicant) {
+            //look if preference exists and if it has to be updated
+            $preference = Preference::where('id_from', '=', $program->pid . '_' . $key_start . '_' . $key_scope)
+              ->where('id_to', '=', $applicant->aid)
+              ->where('pr_kind', '=', 2)
+              ->where('status', '=', 1)->first();
 
-      //construct (update) new preference
-      $request = new Request();
-      $request->setMethod('POST');
-      $request->request->add(['from' => $program->pid . '_' . $key_start . '_' . $key_scope,
-                              'to' => $applicant->aid,
-                              'pr_kind' => 2,
-                              'rank' => $rank,
-                              'status' => 1
-                            ]);
+            //construct (update) new preference
+            $request = new Request();
+            $request->setMethod('POST');
+            $request->request->add(['from' => $program->pid . '_' . $key_start . '_' . $key_scope,
+                                    'to' => $applicant->aid,
+                                    'pr_kind' => 2,
+                                    'rank' => $rank,
+                                    'status' => 1
+                                  ]);
 
-      //does a preference exist?
-      if ($preference != null) {
-        //update
-        $request->request->add(['prid' => $preference->prid]);
-        $this->update($request);
-      } else {
-        //generate preference
-        $this->store($request);
+            //does a preference exist?
+            if ($preference != null) {
+              //update
+              $request->request->add(['prid' => $preference->prid]);
+              $this->update($request);
+            } else {
+              //generate preference
+              $this->store($request);
+            }
+            $rank = $rank + 1;
+          }
+        }
       }
-      $rank = $rank + 1;
     }
   }
-
-}}
-
-    }
-
 
   public function rebuildCoordinatedProgramPreferences($pid) {
     $Preference = new Preference();
@@ -951,5 +947,4 @@ class PreferenceController extends Controller
     $round = $Matching->getRound();
     return $round;
   }
-
 }

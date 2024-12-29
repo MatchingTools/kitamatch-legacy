@@ -70,7 +70,6 @@
               @endforeach
             @endforeach
 
-
             <hr class="mb-4">
             <button class="btn btn-light btn-lg btn-block" type="submit">Änderungen speichern</button>
         </form>
@@ -91,9 +90,7 @@
 
         <!-- to do: add provider button if it has a provider-->
         @if ($program->proid)
-
         <hr class="mb-4">
-
         <a href="{{url('/provider/' . $program->proid)}}"><button class="btn btn-light btn-lg btn-block">Zurück zur Kita</button></a>
         @endif
     </div>

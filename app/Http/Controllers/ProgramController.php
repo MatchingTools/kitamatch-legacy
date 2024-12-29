@@ -164,12 +164,20 @@ class ProgramController extends Controller
   */
   public function all() {
     $programs = Program::all();
+    $totalMatches = 0;
+    $totalCapacity = 0;
     foreach ($programs as $program) {
       $program->provider_name = Provider::where('proid', '=', $program->proid)->first()->name;
       $program->status_description = Code::where('code', '=', $program->status)->first()->value;
-      $program->coordination_description = ($program->coordination == 1) ? "Ja" : "Nein";
       $program->p_kind_description = ($program->p_kind == 1) ? "Öffentlich" : "Frei";
+      $program->capacity = $this->getAvailableCapacity($program->pid);
+      $program->total_offer = $this->getTotalOffer($program->pid);
+      $program->process_complete = ($program->total_offer == $program->capacity) ? "Ja" : "Nein";
+      $totalMatches += $program->total_offer;
+      $totalCapacity += $program->capacity;
     }
+    $programs->totalMatches = $totalMatches;
+    $programs->totalCapacity = $totalCapacity;
     return view('program.all', array('programs' => $programs));
   }
 
@@ -241,6 +249,22 @@ class ProgramController extends Controller
 		 return ($program->capacity - $countFinalsMatches);
 	 }
 
+  public function getAvailableCapacity($pid) {
+    $capacities = app('App\Http\Controllers\CapacityController')->getProgramCapacities($pid);
+    $assignedCapacity = 0;
+    foreach ($capacities as $capacity) {
+      $assignedCapacity += $capacity->capacity;
+    }
+    return $assignedCapacity;
+  }
+
+  public function getTotalOffer($pid) {
+    $Matching = new Matching();
+    return count(Matching::where('pid', '=', $pid)
+        ->whereIn('status', [31, 32])
+        ->get());
+  }
+
   /**
   * Update program status to verified
   *
@@ -278,5 +302,4 @@ class ProgramController extends Controller
       }
     }
   }
-
 }

@@ -109,7 +109,7 @@ class MatchingController extends Controller
     if (!(strlen(json_encode($input))>5)) {
       return redirect()->action('AdminController@index');
     }
-//    print_r(json_encode($input));
+    //print_r(json_encode($input));
 
     //GuzzleHttp\Client
     $client = new Client();
@@ -143,7 +143,7 @@ class MatchingController extends Controller
 
     print("Result: Process completed! Round: ".$matchingRound);
     echo"<br>";
-  //  print_r($result);
+    //print_r($result);
 
     #storing matching results at table in each round
     $storeMatchingResult->round = $this->getRoundNumber();
@@ -453,6 +453,11 @@ class MatchingController extends Controller
     return($json);
   }
 
+  public function getActiveMatchesByProgramId($programId) {
+    $Matching = new Matching();
+    return $Matching->getActiveMatchesByProgramId($programId);
+  }
+
   public function sendMatchingInitiatedNotification(){
     event(new MatchingProcessInitiated());
   }
@@ -460,5 +465,4 @@ class MatchingController extends Controller
   public function sendNotificationToRefresh() {
     event(new MatchingProcessCompleted());
   }
-
 }

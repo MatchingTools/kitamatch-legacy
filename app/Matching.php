@@ -58,6 +58,14 @@ class Matching extends Model
     return $matches;
   }
 
+  public function getActiveMatchesByProgramId($programId) {
+    $matches = DB::table('matches')
+      ->where('pid', 'like', $programId)
+      ->whereIn('status', [31, 32])
+      ->get();
+    return $matches;
+  }
+
   public function getRound() {
   //  return (DB::table('matches')->select(DB::raw("count(DISTINCT TIME_FORMAT(created_at, '%Y-%m-%d %H:%i')) as round"))->first()->round + 1); //open vs. closed rounds
     $maxMrid = DB::table('matching_results')->max('mrid');
