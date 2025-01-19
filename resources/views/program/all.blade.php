@@ -34,6 +34,7 @@
               <th>Gruppe</th>
               <th>Gesamtkapazität</th>
               <th>Angebote</th>
+              <th>Bewerber</th>
               <th>Kita fertig</th>
               <th>Öffentlich / Frei</th>
               <th>Status</th>
@@ -46,6 +47,7 @@
                   <td><a href="{{url('/preference/program/' . $program->pid)}}">{{$program->name}}</a></td>
                   <td>{{$program->capacity}}</td>
                   <td>{{$program->total_offer}}</td>
+                  <td>{{$program->available_applicant}}</td>
                   <td style="color: {{ $program->process_complete == 'Nein' ? 'red' : 'green'}};">{{$program->process_complete}}</td>
                   <td>{{$program->p_kind_description}}</td>
                   <td>{{$program->status_description}}</td>

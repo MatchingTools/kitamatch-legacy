@@ -172,6 +172,7 @@ class ProgramController extends Controller
       $program->p_kind_description = ($program->p_kind == 1) ? "Öffentlich" : "Frei";
       $program->capacity = $this->getAvailableCapacity($program->pid);
       $program->total_offer = $this->getTotalOffer($program->pid);
+      $program->available_applicant = $this->getTotalAvailableApplicant($program->pid);
       $program->process_complete = ($program->total_offer == 0 && $program->capacity == 0) 
         ? '-' 
         : (($program->total_offer == $program->capacity) ? 'Ja' : 'Nein');
@@ -266,6 +267,19 @@ class ProgramController extends Controller
         ->whereIn('status', [31, 32])
         ->get());
   }
+
+  public function getTotalAvailableApplicant($pid) {
+    $preferences = DB::table('preferences')
+        ->select('id_from', 'program_id')
+        ->where('program_id', '=', $pid)
+        ->where('pr_kind', '=', 1)
+        ->where('status', '=', 1)
+        ->distinct()
+        ->get();
+
+    return count($preferences);
+}
+
 
   /**
   * Update program status to verified
