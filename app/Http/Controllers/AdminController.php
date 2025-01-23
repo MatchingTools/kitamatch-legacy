@@ -69,6 +69,33 @@ class AdminController extends Controller
       $match->provider_name = $provider->name;
       $match->status_text = Code::where('code', '=', $match->status)->first()->value;
 
+      $preferences = DB::table('preferences')
+            ->where('id_from', '=', $applicant->aid)
+            ->where('pr_kind', '=', 0)
+            ->orderBy('rank', 'asc')
+            ->get();
+
+      $preference_providers = [];
+      foreach ($preferences as $preference) {
+          $preference_provider = Provider::find($preference->provider_id);
+          if ($preference_provider) {
+              $preference_providers[] = $preference_provider->name;
+          }    
+      }
+
+      $match->preference_1 = isset($preference_providers[0]) ? $preference_providers[0] : '';
+      $match->preference_2 = isset($preference_providers[1]) ? $preference_providers[1] : '';
+      $match->preference_3 = isset($preference_providers[2]) ? $preference_providers[2] : '';
+      $match->preference_4 = isset($preference_providers[3]) ? $preference_providers[3] : '';
+      $match->preference_5 = isset($preference_providers[4]) ? $preference_providers[4] : '';
+      $match->preference_6 = isset($preference_providers[5]) ? $preference_providers[5] : '';
+      $match->preference_7 = isset($preference_providers[6]) ? $preference_providers[6] : '';
+      $match->preference_8 = isset($preference_providers[7]) ? $preference_providers[7] : '';
+      $match->preference_9 = isset($preference_providers[8]) ? $preference_providers[8] : '';
+      $match->preference_10 = isset($preference_providers[9]) ? $preference_providers[9] : '';
+      $match->preference_11 = isset($preference_providers[10]) ? $preference_providers[10] : '';
+      $match->preference_12 = isset($preference_providers[11]) ? $preference_providers[11] : '';
+
       $scopes = config('kitamatch_config.care_scopes');
       $starts = config('kitamatch_config.care_starts');
 
@@ -139,6 +166,33 @@ class AdminController extends Controller
         $nonMatches[$applicant->aid]['additional_criteria_10'] = $applicant->additionalCriteria_10;
         $nonMatches[$applicant->aid]['additional_criteria_11'] = $applicant->additionalCriteria_11;
         $nonMatches[$applicant->aid]['additional_criteria_12'] = $applicant->additionalCriteria_12;
+
+        $preferences = DB::table('preferences')
+            ->where('id_from', '=', $applicant->aid)
+            ->where('pr_kind', '=', 0)
+            ->orderBy('rank', 'asc')
+            ->get();
+
+        $preference_providers = [];
+        foreach ($preferences as $preference) {
+            $preference_provider = Provider::find($preference->provider_id);
+            if ($preference_provider) {
+                $preference_providers[] = $preference_provider->name;
+            }    
+        }
+
+        $nonMatches[$applicant->aid]['preference_1'] = isset($preference_providers[0]) ? $preference_providers[0] : '';
+        $nonMatches[$applicant->aid]['preference_2'] = isset($preference_providers[1]) ? $preference_providers[1] : '';
+        $nonMatches[$applicant->aid]['preference_3'] = isset($preference_providers[2]) ? $preference_providers[2] : '';
+        $nonMatches[$applicant->aid]['preference_4'] = isset($preference_providers[3]) ? $preference_providers[3] : '';
+        $nonMatches[$applicant->aid]['preference_5'] = isset($preference_providers[4]) ? $preference_providers[4] : '';
+        $nonMatches[$applicant->aid]['preference_6'] = isset($preference_providers[5]) ? $preference_providers[5] : '';
+        $nonMatches[$applicant->aid]['preference_7'] = isset($preference_providers[6]) ? $preference_providers[6] : '';
+        $nonMatches[$applicant->aid]['preference_8'] = isset($preference_providers[7]) ? $preference_providers[7] : '';
+        $nonMatches[$applicant->aid]['preference_9'] = isset($preference_providers[8]) ? $preference_providers[8] : '';
+        $nonMatches[$applicant->aid]['preference_10'] = isset($preference_providers[9]) ? $preference_providers[9] : '';
+        $nonMatches[$applicant->aid]['preference_11'] = isset($preference_providers[10]) ? $preference_providers[10] : '';
+        $nonMatches[$applicant->aid]['preference_12'] = isset($preference_providers[11]) ? $preference_providers[11] : '';
       }
     }
     $data['non-matches'] = $nonMatches;
@@ -171,8 +225,7 @@ class AdminController extends Controller
     return redirect()->action('AdminController@index');
   }
 
-  public function exportAssignedApplicants()
-  {
+  public function exportAssignedApplicants(){
     $matches = $this->listMatchings();
     $matches_array[] = array(
       'ID',
@@ -184,6 +237,18 @@ class AdminController extends Controller
       'Umfang',
       'Beginn',
       'Rangordnungspunkte',
+      'Wunscheinrichtung',
+      '2. Wunsch',
+      '3. Wunsch',
+      '4. Wunsch',
+      '5. Wunsch',
+      '6. Wunsch',
+      '7. Wunsch',
+      '8. Wunsch',
+      '9. Wunsch',
+      '10. Wunsch',
+      '11. Wunsch',
+      '12. Wunsch',
       'Zusatzkriterium1',
       'Zusatzkriterium2',
       'Zusatzkriterium3',
@@ -217,6 +282,18 @@ class AdminController extends Controller
         'Umfang' => $scope,
         'Beginn' => $match->start_date,
         'Rangordnungspunkte' => $match->points_manual,
+        'Wunscheinrichtung' => $match->preference_1,
+        '2. Wunsch' => $match->preference_2,
+        '3. Wunsch' => $match->preference_3,
+        '4. Wunsch' => $match->preference_4,
+        '5. Wunsch' => $match->preference_5,
+        '6. Wunsch' => $match->preference_6,
+        '7. Wunsch' => $match->preference_7,
+        '8. Wunsch' => $match->preference_8,
+        '9. Wunsch' => $match->preference_9,
+        '10. Wunsch' => $match->preference_10,
+        '11. Wunsch' => $match->preference_11,
+        '12. Wunsch' => $match->preference_12,
         'Zusatzkriterium1' => $this->getProviderName($match->additional_criteria_1),
         'Zusatzkriterium2' => $this->getProviderName($match->additional_criteria_2),
         'Zusatzkriterium3' => $this->getProviderName($match->additional_criteria_3),
@@ -239,8 +316,7 @@ class AdminController extends Controller
     })->download('xlsx');
   }
 
-  public function exportUnassignedApplicants()
-  {
+  public function exportUnassignedApplicants(){
     $data = $this->generateDashboard();
     $nonMatches_array[] = array(
       'ID',
@@ -250,6 +326,18 @@ class AdminController extends Controller
       'Quartal',
       'Umfang',
       'Rangordnungspunkte',
+      'Wunscheinrichtung',
+      '2. Wunsch',
+      '3. Wunsch',
+      '4. Wunsch',
+      '5. Wunsch',
+      '6. Wunsch',
+      '7. Wunsch',
+      '8. Wunsch',
+      '9. Wunsch',
+      '10. Wunsch',
+      '11. Wunsch',
+      '12. Wunsch',
       'Zusatzkriterium1',
       'Zusatzkriterium2',
       'Zusatzkriterium3',
@@ -273,6 +361,18 @@ class AdminController extends Controller
         'care_start' => $nonMatch['care_start'],
         'care_scope' => $nonMatch['care_scope'],
         'Rangordnungspunkte' => $nonMatch['points_manual'],
+        'Wunscheinrichtung' => $nonMatch['preference_1'],
+        '2. Wunsch' => $nonMatch['preference_2'],
+        '3. Wunsch' => $nonMatch['preference_3'],
+        '4. Wunsch' => $nonMatch['preference_4'],
+        '5. Wunsch' => $nonMatch['preference_5'],
+        '6. Wunsch' => $nonMatch['preference_6'],
+        '7. Wunsch' => $nonMatch['preference_7'],
+        '8. Wunsch' => $nonMatch['preference_8'],
+        '9. Wunsch' => $nonMatch['preference_9'],
+        '10. Wunsch' => $nonMatch['preference_10'],
+        '11. Wunsch' => $nonMatch['preference_11'],
+        '12. Wunsch' => $nonMatch['preference_12'],
         'Zusatzkriterium1' => $this->getProviderName($nonMatch['additional_criteria_1']),
         'Zusatzkriterium2' => $this->getProviderName($nonMatch['additional_criteria_2']),
         'Zusatzkriterium3' => $this->getProviderName($nonMatch['additional_criteria_3']),
