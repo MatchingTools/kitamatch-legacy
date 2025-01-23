@@ -47,7 +47,7 @@ class AdminController extends Controller
   public function listMatchings() {
     // Eager load related models
     $matches = Matching::whereIn('status', [31, 32])
-        ->with(['applicant.preferences.provider', 'program.provider', 'statusCode'])
+        ->with(['applicant', 'program.provider', 'statusCode'])
         ->get();
     
     $scopes = config('kitamatch_config.care_scopes');
@@ -77,14 +77,12 @@ class AdminController extends Controller
       $match->provider_name = $provider->name;
       $match->status_text = $match->statusCode->value;
 
-      $preference_providers = [];
       $preferences = DB::table('preferences')
             ->where('id_from', '=', $applicant->aid)
             ->where('pr_kind', '=', 0)
             ->orderBy('rank', 'asc')
             ->get();
      
-
       $preference_providers = [];
       foreach ($preferences as $preference) {
           $preference_provider = Provider::find($preference->provider_id);
@@ -129,7 +127,7 @@ class AdminController extends Controller
     $scopes = config('kitamatch_config.care_scopes');
     $starts = config('kitamatch_config.care_starts');
 
-    $applicants = Applicant::with(['matches', 'preferences.provider'])->get();
+    $applicants = Applicant::with(['matches'])->get();
     $programs = Program::all();
     $providers = Provider::all();
     $matching = $Matching->getActiveMatches();
