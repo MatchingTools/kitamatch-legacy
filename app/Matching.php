@@ -31,7 +31,7 @@ class Matching extends Model
   }
 
   public function program() {
-    return $this->belongsTo(Program::class, 'pid', 'pid');
+    return $this->belongsTo(Program::class, 'program_id', 'pid');
   }
 
   public function statusCode() {

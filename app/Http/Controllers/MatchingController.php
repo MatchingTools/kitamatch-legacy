@@ -66,6 +66,8 @@ class MatchingController extends Controller
     $match = new Matching;
     $match->aid = $request->student;
     $match->pid = $request->college;
+    $pid_split = explode("_", $request->college);
+    $match->program_id = $pid_split[0];
     $match->round = $request->round;
     $match->status = $request->status;
     $match->save();

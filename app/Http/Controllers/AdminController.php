@@ -45,9 +45,19 @@ class AdminController extends Controller
   }
 
   public function listMatchings() {
-    $matches = DB::table('matches')->whereIn('status', [31, 32])->get();
+    // Eager load related models
+    $matches = Matching::whereIn('status', [31, 32])
+        ->with(['applicant.preferences.provider', 'program.provider', 'statusCode'])
+        ->get();
+    
+    $scopes = config('kitamatch_config.care_scopes');
+    $starts = config('kitamatch_config.care_starts');
+
     foreach ($matches as $match) {
-      $applicant = Applicant::where('aid', '=', $match->aid)->first();
+      $applicant = $match->applicant;
+      $program = $match->program;
+      $provider = $program->provider;
+
       $match->applicant_name = $applicant->first_name . " " . $applicant->last_name;
       $match->points_manual = $applicant->points_manual;
       $match->start_date = $applicant->start_date;
@@ -63,17 +73,17 @@ class AdminController extends Controller
       $match->additional_criteria_10 = $applicant->additionalCriteria_10;
       $match->additional_criteria_11 = $applicant->additionalCriteria_11;
       $match->additional_criteria_12 = $applicant->additionalCriteria_12;
-      $program = Program::where('pid', '=', $match->pid)->first();
-      $provider = Provider::find($program->proid);
       $match->program_name = $program->name;
       $match->provider_name = $provider->name;
-      $match->status_text = Code::where('code', '=', $match->status)->first()->value;
+      $match->status_text = $match->statusCode->value;
 
+      $preference_providers = [];
       $preferences = DB::table('preferences')
             ->where('id_from', '=', $applicant->aid)
             ->where('pr_kind', '=', 0)
             ->orderBy('rank', 'asc')
             ->get();
+     
 
       $preference_providers = [];
       foreach ($preferences as $preference) {
@@ -83,24 +93,11 @@ class AdminController extends Controller
           }    
       }
 
-      $match->preference_1 = isset($preference_providers[0]) ? $preference_providers[0] : '';
-      $match->preference_2 = isset($preference_providers[1]) ? $preference_providers[1] : '';
-      $match->preference_3 = isset($preference_providers[2]) ? $preference_providers[2] : '';
-      $match->preference_4 = isset($preference_providers[3]) ? $preference_providers[3] : '';
-      $match->preference_5 = isset($preference_providers[4]) ? $preference_providers[4] : '';
-      $match->preference_6 = isset($preference_providers[5]) ? $preference_providers[5] : '';
-      $match->preference_7 = isset($preference_providers[6]) ? $preference_providers[6] : '';
-      $match->preference_8 = isset($preference_providers[7]) ? $preference_providers[7] : '';
-      $match->preference_9 = isset($preference_providers[8]) ? $preference_providers[8] : '';
-      $match->preference_10 = isset($preference_providers[9]) ? $preference_providers[9] : '';
-      $match->preference_11 = isset($preference_providers[10]) ? $preference_providers[10] : '';
-      $match->preference_12 = isset($preference_providers[11]) ? $preference_providers[11] : '';
-
-      $scopes = config('kitamatch_config.care_scopes');
-      $starts = config('kitamatch_config.care_starts');
+      for ($i = 1; $i <= 12; $i++) {
+          $match->{"preference_$i"} = isset($preference_providers[$i - 1]) ? $preference_providers[$i - 1] : '';
+      }
 
       $pid_split = explode("_", $match->pid);
-      $pid = $pid_split[0];
       $match->start = $starts[$pid_split[1]];
       $match->scope = $scopes[$pid_split[2]];
     }
@@ -169,16 +166,22 @@ class AdminController extends Controller
           'additional_criteria_12' => $applicant->additionalCriteria_12,
         ];
 
+        $preferences = DB::table('preferences')
+        ->where('id_from', '=', $applicant->aid)
+        ->where('pr_kind', '=', 0)
+        ->orderBy('rank', 'asc')
+        ->get();
 
         $preference_providers = [];
-        foreach ($applicant->preferences as $preference) {
-          if ($preference->provider) {
-              $preference_providers[] = $preference->provider->name;
-          }
+        foreach ($preferences as $preference) {
+            $preference_provider = Provider::find($preference->provider_id);
+            if ($preference_provider) {
+                $preference_providers[] = $preference_provider->name;
+            }    
         }
 
         for ($i = 1; $i <= 12; $i++) {
-          $nonMatches[$applicant->aid]["preference_$i"] = $preference_providers[$i - 1] ?? '';
+          $nonMatches[$applicant->aid]["preference_$i"] = isset($preference_providers[$i - 1]) ? $preference_providers[$i - 1] : '';
         }
       }
     }
