@@ -125,74 +125,61 @@ class AdminController extends Controller
   }
 
   public function generateDashboard() {
-    $Applicant = new Applicant;
-    $Program = new Program;
-    $Provider = new Provider;
     $Matching = new Matching;
+
     $data = array();
-    $applicants = Applicant::all();
+    $age_cohorts = config('kitamatch_config.age_cohorts');
+    $scopes = config('kitamatch_config.care_scopes');
+    $starts = config('kitamatch_config.care_starts');
+
+    $applicants = Applicant::with(['matches', 'preferences.provider'])->get();
     $programs = Program::all();
     $providers = Provider::all();
     $matching = $Matching->getActiveMatches();
     $data['applicants'] = $applicants;
-    $data['applicantsCount'] = count($applicants);
+    $data['applicantsCount'] = $applicants->count();
     $data['applicantsVerified'] = count(Applicant::whereIn('status', [22, 25, 26])->get());
     $data['applicantsFinal'] = count(Applicant::where('status', '=', 26)->get());
-    $age_cohorts = config('kitamatch_config.age_cohorts');
-    $scopes = config('kitamatch_config.care_scopes');
-    $starts = config('kitamatch_config.care_starts');
+
 
     $nonMatches = array();
     foreach ($applicants as $applicant) {
       $filter = DB::table('matches')->where('aid', '=', $applicant->aid)->first();
       if (count($filter) == 0) {
-        $nonMatches[$applicant->aid]['aid'] = $applicant->aid;
-        $nonMatches[$applicant->aid]['first_name'] = $applicant->first_name;
-        $nonMatches[$applicant->aid]['last_name'] = $applicant->last_name;
-        $nonMatches[$applicant->aid]['birthday'] = $applicant->birthday;
-        $nonMatches[$applicant->aid]['age_cohort'] = $age_cohorts[$applicant->age_cohort];
-        $nonMatches[$applicant->aid]['care_scope'] = $scopes[$applicant->care_scope];
-        $nonMatches[$applicant->aid]['care_start'] = $starts[$applicant->care_start];
-        $nonMatches[$applicant->aid]['points_manual'] = $applicant->points_manual;
-        $nonMatches[$applicant->aid]['additional_criteria_1'] = $applicant->additionalCriteria_1;
-        $nonMatches[$applicant->aid]['additional_criteria_2'] = $applicant->additionalCriteria_2;
-        $nonMatches[$applicant->aid]['additional_criteria_3'] = $applicant->additionalCriteria_3;
-        $nonMatches[$applicant->aid]['additional_criteria_4'] = $applicant->additionalCriteria_4;
-        $nonMatches[$applicant->aid]['additional_criteria_5'] = $applicant->additionalCriteria_5;
-        $nonMatches[$applicant->aid]['additional_criteria_6'] = $applicant->additionalCriteria_6;
-        $nonMatches[$applicant->aid]['additional_criteria_7'] = $applicant->additionalCriteria_7;
-        $nonMatches[$applicant->aid]['additional_criteria_8'] = $applicant->additionalCriteria_8;
-        $nonMatches[$applicant->aid]['additional_criteria_9'] = $applicant->additionalCriteria_9;
-        $nonMatches[$applicant->aid]['additional_criteria_10'] = $applicant->additionalCriteria_10;
-        $nonMatches[$applicant->aid]['additional_criteria_11'] = $applicant->additionalCriteria_11;
-        $nonMatches[$applicant->aid]['additional_criteria_12'] = $applicant->additionalCriteria_12;
+        $nonMatches[$applicant->aid] = [
+          'aid' => $applicant->aid,
+          'first_name' => $applicant->first_name,
+          'last_name' => $applicant->last_name,
+          'birthday' => $applicant->birthday,
+          'age_cohort' => $age_cohorts[$applicant->age_cohort],
+          'care_scope' => $scopes[$applicant->care_scope],
+          'care_start' => $starts[$applicant->care_start],
+          'points_manual' => $applicant->points_manual,
+          'additional_criteria_1' => $applicant->additionalCriteria_1,
+          'additional_criteria_2' => $applicant->additionalCriteria_2,
+          'additional_criteria_3' => $applicant->additionalCriteria_3,
+          'additional_criteria_4' => $applicant->additionalCriteria_4,
+          'additional_criteria_5' => $applicant->additionalCriteria_5,
+          'additional_criteria_6' => $applicant->additionalCriteria_6,
+          'additional_criteria_7' => $applicant->additionalCriteria_7,
+          'additional_criteria_8' => $applicant->additionalCriteria_8,
+          'additional_criteria_9' => $applicant->additionalCriteria_9,
+          'additional_criteria_10' => $applicant->additionalCriteria_10,
+          'additional_criteria_11' => $applicant->additionalCriteria_11,
+          'additional_criteria_12' => $applicant->additionalCriteria_12,
+        ];
 
-        $preferences = DB::table('preferences')
-            ->where('id_from', '=', $applicant->aid)
-            ->where('pr_kind', '=', 0)
-            ->orderBy('rank', 'asc')
-            ->get();
 
         $preference_providers = [];
-        foreach ($preferences as $preference) {
-            $preference_provider = Provider::find($preference->provider_id);
-            if ($preference_provider) {
-                $preference_providers[] = $preference_provider->name;
-            }    
+        foreach ($applicant->preferences as $preference) {
+          if ($preference->provider) {
+              $preference_providers[] = $preference->provider->name;
+          }
         }
 
-        $nonMatches[$applicant->aid]['preference_1'] = isset($preference_providers[0]) ? $preference_providers[0] : '';
-        $nonMatches[$applicant->aid]['preference_2'] = isset($preference_providers[1]) ? $preference_providers[1] : '';
-        $nonMatches[$applicant->aid]['preference_3'] = isset($preference_providers[2]) ? $preference_providers[2] : '';
-        $nonMatches[$applicant->aid]['preference_4'] = isset($preference_providers[3]) ? $preference_providers[3] : '';
-        $nonMatches[$applicant->aid]['preference_5'] = isset($preference_providers[4]) ? $preference_providers[4] : '';
-        $nonMatches[$applicant->aid]['preference_6'] = isset($preference_providers[5]) ? $preference_providers[5] : '';
-        $nonMatches[$applicant->aid]['preference_7'] = isset($preference_providers[6]) ? $preference_providers[6] : '';
-        $nonMatches[$applicant->aid]['preference_8'] = isset($preference_providers[7]) ? $preference_providers[7] : '';
-        $nonMatches[$applicant->aid]['preference_9'] = isset($preference_providers[8]) ? $preference_providers[8] : '';
-        $nonMatches[$applicant->aid]['preference_10'] = isset($preference_providers[9]) ? $preference_providers[9] : '';
-        $nonMatches[$applicant->aid]['preference_11'] = isset($preference_providers[10]) ? $preference_providers[10] : '';
-        $nonMatches[$applicant->aid]['preference_12'] = isset($preference_providers[11]) ? $preference_providers[11] : '';
+        for ($i = 1; $i <= 12; $i++) {
+          $nonMatches[$applicant->aid]["preference_$i"] = $preference_providers[$i - 1] ?? '';
+        }
       }
     }
     $data['non-matches'] = $nonMatches;

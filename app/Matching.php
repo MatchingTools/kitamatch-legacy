@@ -26,6 +26,18 @@ use Carbon\Carbon;
 class Matching extends Model
 {
 
+  public function applicant() {
+    return $this->belongsTo(Applicant::class, 'aid', 'aid');
+  }
+
+  public function program() {
+    return $this->belongsTo(Program::class, 'pid', 'pid');
+  }
+
+  public function statusCode() {
+    return $this->belongsTo(Code::class, 'status', 'code');
+  }
+
   /**
   * Reset all  matches, except final ones, to historical status (before writing the new ones)
   *

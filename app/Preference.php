@@ -25,7 +25,9 @@ use App\Program;
 class Preference extends Model
 {
   //pr_kind: 1:applicant, 2:program coordinated, 3:program uncoordinated
-
+  public function provider() {
+    return $this->belongsTo(Provider::class, 'provider_id');
+  }
   /**
   * Update the status of a single preference
   *

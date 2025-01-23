@@ -23,6 +23,10 @@ use Illuminate\Support\Facades\DB;
 */
 class Program extends Model
 {
+
+  public function provider() {
+    return $this->belongsTo(Provider::class, 'proid');
+  }
   /**
   * Get all programs with status 12 or 13 ordered by name
   *

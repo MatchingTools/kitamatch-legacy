@@ -35,6 +35,14 @@ class Applicant extends Model
     return $applicants;
   }
 
+  public function matches() {
+    return $this->hasMany(Matching::class, 'aid', 'aid');
+  }
+
+  public function preferences() {
+    return $this->hasMany(Preference::class, 'id_from', 'aid');
+  }
+
   /**
   * Get the corresponding guardian id of an applicant
   *
