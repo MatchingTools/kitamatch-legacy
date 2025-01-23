@@ -26,18 +26,22 @@
 
 <div class="row justify-content-center">
   <h2>Liste aller Kitagruppen <small class="text-muted">(Platzvergabe: {{$programs->totalMatches}}/{{$programs->totalCapacity}})</small></h2>
+  
+  <div class="col-md-12  my-3 p-3 bg-white rounded box-shadow">
+  <b>Plätze verfügbar:</b> (Freie Plätze – Angebote) |
+  <b>Bewerber interessiert:</b> Bewerber, die sich für die Gruppe interessiert haben |
+  <b>Kita fertig:</b> Ist die Kita fertig mit der Platzvergabe?
+  </div>
+  
   <div class="col-md-12  my-3 p-3 bg-white rounded box-shadow">
       <table class="table" id="programs">
         <thead>
           <tr>
               <th>Kita</th>
               <th>Gruppe</th>
-              <th>Gesamtkapazität</th>
-              <th>Angebote</th>
-              <th>Bewerber</th>
+              <th>Plätze verfügbar</th>
+              <th>Bewerber interessiert</th>
               <th>Kita fertig</th>
-              <th>Öffentlich / Frei</th>
-              <th>Status</th>
           </tr>
         </thead>
         <tbody>
@@ -45,12 +49,9 @@
               <tr>
                   <td><a href="{{url('/provider/' . $program->proid)}}">{{$program->provider_name}}</a></td>
                   <td><a href="{{url('/preference/program/' . $program->pid)}}">{{$program->name}}</a></td>
-                  <td>{{$program->capacity}}</td>
-                  <td>{{$program->total_offer}}</td>
+                  <td>{{$program->available_capacity}}</td>
                   <td>{{$program->available_applicant}}</td>
                   <td style="color: {{ $program->process_complete == 'Nein' ? 'red' : 'green'}};">{{$program->process_complete}}</td>
-                  <td>{{$program->p_kind_description}}</td>
-                  <td>{{$program->status_description}}</td>
               </tr>
           @endforeach
         </tbody>

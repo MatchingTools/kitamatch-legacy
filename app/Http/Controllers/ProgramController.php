@@ -167,17 +167,14 @@ class ProgramController extends Controller
     $totalMatches = 0;
     $totalCapacity = 0;
     foreach ($programs as $program) {
+      $total_offer = $this->getTotalOffer($program->pid);
+      $programCapacity = $this->getTotalCapacity($program->pid);
       $program->provider_name = Provider::where('proid', '=', $program->proid)->first()->name;
-      $program->status_description = Code::where('code', '=', $program->status)->first()->value;
-      $program->p_kind_description = ($program->p_kind == 1) ? "Öffentlich" : "Frei";
-      $program->capacity = $this->getAvailableCapacity($program->pid);
-      $program->total_offer = $this->getTotalOffer($program->pid);
+      $program->available_capacity = $programCapacity - $total_offer;
       $program->available_applicant = $this->getTotalAvailableApplicant($program->pid);
-      $program->process_complete = ($program->total_offer == 0 && $program->capacity == 0) 
-        ? '-' 
-        : (($program->total_offer == $program->capacity) ? 'Ja' : 'Nein');
-      $totalMatches += $program->total_offer;
-      $totalCapacity += $program->capacity;
+      $program->process_complete = (min($program->available_capacity, $program->available_applicant) == 0) ? 'Ja' : 'Nein';
+      $totalMatches += $total_offer;
+      $totalCapacity += $programCapacity;
     }
     $programs->totalMatches = $totalMatches;
     $programs->totalCapacity = $totalCapacity;
@@ -252,7 +249,7 @@ class ProgramController extends Controller
 		 return ($program->capacity - $countFinalsMatches);
 	 }
 
-  public function getAvailableCapacity($pid) {
+  public function getTotalCapacity($pid) {
     $capacities = app('App\Http\Controllers\CapacityController')->getProgramCapacities($pid);
     $assignedCapacity = 0;
     foreach ($capacities as $capacity) {
@@ -269,16 +266,25 @@ class ProgramController extends Controller
   }
 
   public function getTotalAvailableApplicant($pid) {
+    $excludedIds = DB::table('matches')
+      	->select('aid')
+        ->whereIn('status', [31, 32])
+        ->where('pid', 'LIKE', $pid . '%')
+        ->distinct()
+        ->get()
+        ->pluck('aid')
+        ->toArray();
+
     $preferences = DB::table('preferences')
         ->select('id_from', 'program_id')
         ->where('program_id', '=', $pid)
         ->where('pr_kind', '=', 1)
         ->where('status', '=', 1)
+        ->whereNotIn('id_from', $excludedIds)
         ->distinct()
         ->get();
-
     return count($preferences);
-}
+  }
 
 
   /**
