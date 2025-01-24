@@ -171,6 +171,7 @@ CREATE TABLE IF NOT EXISTS `matches` (
   `mid` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
   `aid` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `pid` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `program_id` int(10) NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `status` smallint(5) UNSIGNED NOT NULL,

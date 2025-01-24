@@ -269,7 +269,7 @@ class ProgramController extends Controller
     $excludedIds = DB::table('matches')
       	->select('aid')
         ->whereIn('status', [31, 32])
-        ->where('pid', 'LIKE', $pid . '%')
+        ->where('program_id', '=', $pid)
         ->distinct()
         ->get()
         ->pluck('aid')
