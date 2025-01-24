@@ -72,7 +72,7 @@ class Matching extends Model
 
   public function getActiveMatchesByProgramId($programId) {
     $matches = DB::table('matches')
-      ->where('pid', 'like', $programId)
+      ->where('program_id', '=', $programId)
       ->whereIn('status', [31, 32])
       ->get();
     return $matches;

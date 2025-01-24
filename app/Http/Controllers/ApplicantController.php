@@ -118,7 +118,7 @@ class ApplicantController extends Controller
   * @return view applicant.all
   */
   public function all() {
-    $applicants = Applicant::all();
+    $applicants = Applicant::with('statusCode')->get();
     return view('applicant.all', array('applicants' => $applicants));
   }
 

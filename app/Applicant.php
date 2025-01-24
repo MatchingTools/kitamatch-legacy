@@ -43,6 +43,10 @@ class Applicant extends Model
     return $this->hasMany(Preference::class, 'id_from', 'aid');
   }
 
+  public function statusCode() {
+    return $this->belongsTo(Code::class, 'status', 'code');
+  }
+
   /**
   * Get the corresponding guardian id of an applicant
   *

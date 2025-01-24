@@ -22,26 +22,23 @@
     channel.bind('page-reload', function() {
       location.reload();
     });
+
+  $(document).ready(function(){
+    $('[data-toggle="tooltip"]').tooltip();
+  });  
 </script>
 
 <div class="row justify-content-center">
   <h2>Liste aller Kitagruppen <small class="text-muted">(Platzvergabe: {{$programs->totalMatches}}/{{$programs->totalCapacity}})</small></h2>
-  
-  <div class="col-md-12  my-3 p-3 bg-white rounded box-shadow">
-  <b>Plätze verfügbar:</b> (Freie Plätze – Angebote) |
-  <b>Bewerber interessiert:</b> Bewerber, die sich für die Gruppe interessiert haben |
-  <b>Kita fertig:</b> Ist die Kita fertig mit der Platzvergabe?
-  </div>
-  
   <div class="col-md-12  my-3 p-3 bg-white rounded box-shadow">
       <table class="table" id="programs">
         <thead>
           <tr>
               <th>Kita</th>
               <th>Gruppe</th>
-              <th>Plätze verfügbar</th>
-              <th>Bewerber interessiert</th>
-              <th>Kita fertig</th>
+              <th data-toggle="tooltip", title ="Plätze, die in aktueller Koordinierungsrunde noch frei sind">Verfügbare Plätze</th>
+              <th data-toggle="tooltip", title ="Bewerber, die aktuell ein Platzangebot der Gruppe annehmen würden">Interessierte Bewerber</th>
+              <th data-toggle="tooltip", title ="Kita hat keine verfügbaren Plätze oder interessierten Bewerber mehr">Kita fertig</th>
           </tr>
         </thead>
         <tbody>

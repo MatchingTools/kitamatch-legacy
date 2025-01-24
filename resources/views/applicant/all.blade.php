@@ -32,7 +32,7 @@
                 <td>{{$applicant->aid}}</td>
                 <td>{{$applicant->first_name}}</td>
                 <td>{{$applicant->last_name}}</td>
-                <td>{{$applicant->status}}</td>
+                <td>{{$applicant->statusCode->value ?? 'N/A'}}</td>
                 <td><a href="{{url('/applicant/' . $applicant->aid)}}"><button type="button" class="btn btn-primary">Einsehen</button></a></td>
                 <td>
                     <form action="{{url('/applicant/' . $applicant->aid)}}" method="POST">
