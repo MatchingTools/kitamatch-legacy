@@ -245,144 +245,30 @@ class Preference extends Model
     foreach($applicants as $applicant) {
       //$guardian = Guardian::find($applicant->gid);
       $applicant->order = 0;
-      //if ($guardian != null) {
-        foreach($criteria as $criterium) {
-          $criterium_name = $criterium->criterium_name;
-          if ($criterium->criterium_value == $applicant->{$criterium_name}) {
-            $applicant->order = $applicant->order + $criterium->rank * $criterium->multiplier;
-          }
+      $applicant->points = $applicant->points_manual;
+
+      foreach($criteria as $criterium) {
+        $criterium_name = $criterium->criterium_name;
+        if ($criterium->criterium_value == $applicant->{$criterium_name}) {
+          $applicant->order = $applicant->order + $criterium->rank * $criterium->multiplier;
         }
+      }
 
       // if manual points = TRUE, calculate points if sibiling is within the same institution
-      if (config('kitamatch_config.manual_points')) {
-        if ($applicant->siblings == $provider_id) {
-          $applicant->points = $applicant->points_manual + config('kitamatch_config.manual_points_value');
-        } else {
-          $applicant->points = $applicant->points_manual;
-        }
+      if (config('kitamatch_config.manual_points') && $applicant->siblings == $provider_id) {
+        $applicant->points += config('kitamatch_config.manual_points_value');
       }
 
       //Bonus for first prefered kita
-      if(config('kitamatch_config.preference_bouns')){
-        if ($applicant->first_preference_program == $provider_id) {
-          $applicant->points = $applicant->points + config('kitamatch_config.preference_bouns_value');
-        } else {
-          $applicant->points = $applicant->points;
-        }
+      if (config('kitamatch_config.preference_bouns') && $applicant->first_preference_program == $provider_id) {
+        $applicant->points += config('kitamatch_config.preference_bouns_value');
       }
 
       //Additional Bonus for applicants
-      if(config('kitamatch_config.additionalCriteriaBonus_1')){
-        if ($applicant->additionalCriteria_1 == $provider_id) {
-          $applicant->points = $applicant->points + config('kitamatch_config.additionalCriteriaBonus_1_value');
-        } else {
-          $applicant->points = $applicant->points;
-        }
+      for ($i = 1; $i <= 12; $i++) {
+        $this->addAdditionalCriteriaBonus($applicant, $provider_id, $i);
       }
 
-      //Additional Bonus for applicants
-      if(config('kitamatch_config.additionalCriteriaBonus_2')){
-        if ($applicant->additionalCriteria_2 == $provider_id) {
-          $applicant->points = $applicant->points + config('kitamatch_config.additionalCriteriaBonus_2_value');
-        } else {
-          $applicant->points = $applicant->points;
-        }
-      }
-      
-      //Additional Bonus for applicants
-      if(config('kitamatch_config.additionalCriteriaBonus_3')){
-        if ($applicant->additionalCriteria_3 == $provider_id) {
-          $applicant->points = $applicant->points + config('kitamatch_config.additionalCriteriaBonus_3_value');
-        } else {
-          $applicant->points = $applicant->points;
-        }
-      }
-
-      //Additional Bonus for applicants
-      if(config('kitamatch_config.additionalCriteriaBonus_4')){
-        if ($applicant->additionalCriteria_4 == $provider_id) {
-          $applicant->points = $applicant->points + config('kitamatch_config.additionalCriteriaBonus_4_value');
-        } else {
-          $applicant->points = $applicant->points;
-        }
-      }
-
-      //Additional Bonus for applicants
-      if(config('kitamatch_config.additionalCriteriaBonus_5')){
-        if ($applicant->additionalCriteria_5 == $provider_id) {
-          $applicant->points = $applicant->points + config('kitamatch_config.additionalCriteriaBonus_5_value');
-        } else {
-          $applicant->points = $applicant->points;
-        }
-      }
-
-      //Additional Bonus for applicants
-      if(config('kitamatch_config.additionalCriteriaBonus_6')){
-        if ($applicant->additionalCriteria_6 == $provider_id) {
-          $applicant->points = $applicant->points + config('kitamatch_config.additionalCriteriaBonus_6_value');
-        } else {
-          $applicant->points = $applicant->points;
-        }
-      }
-
-      //Additional Bonus for applicants
-      if(config('kitamatch_config.additionalCriteriaBonus_7')){
-        if ($applicant->additionalCriteria_7 == $provider_id) {
-          $applicant->points = $applicant->points + config('kitamatch_config.additionalCriteriaBonus_7_value');
-        } else {
-          $applicant->points = $applicant->points;
-        }
-      }
-
-      //Additional Bonus for applicants
-      if(config('kitamatch_config.additionalCriteriaBonus_8')){
-        if ($applicant->additionalCriteria_8 == $provider_id) {
-          $applicant->points = $applicant->points + config('kitamatch_config.additionalCriteriaBonus_8_value');
-        } else {
-          $applicant->points = $applicant->points;
-        }
-      }
-
-      //Additional Bonus for applicants
-      if(config('kitamatch_config.additionalCriteriaBonus_9')){
-        if ($applicant->additionalCriteria_9 == $provider_id) {
-          $applicant->points = $applicant->points + config('kitamatch_config.additionalCriteriaBonus_9_value');
-        } else {
-          $applicant->points = $applicant->points;
-        }
-      }
-
-      //Additional Bonus for applicants
-      if(config('kitamatch_config.additionalCriteriaBonus_10')){
-        if ($applicant->additionalCriteria_10 == $provider_id) {
-          $applicant->points = $applicant->points + config('kitamatch_config.additionalCriteriaBonus_10_value');
-        } else {
-          $applicant->points = $applicant->points;
-        }
-      }
-
-      //Additional Bonus for applicants
-      if(config('kitamatch_config.additionalCriteriaBonus_11')){
-        if ($applicant->additionalCriteria_11 == $provider_id) {
-          $applicant->points = $applicant->points + config('kitamatch_config.additionalCriteriaBonus_11_value');
-        } else {
-          $applicant->points = $applicant->points;
-        }
-      }
-
-      //Additional Bonus for applicants
-      if(config('kitamatch_config.additionalCriteriaBonus_12')){
-        if ($applicant->additionalCriteria_12 == $provider_id) {
-          $applicant->points = $applicant->points + config('kitamatch_config.additionalCriteriaBonus_12_value');
-        } else {
-          $applicant->points = $applicant->points;
-        }
-      }
-
-      //} else {
-        //no guardian -> order = 10000, to order asc
-      //  $applicant->order = 0;
-      //}
       //highly important applicants
       if ($applicant->status == 25) {
         $applicant->order = 2 * 12;
@@ -392,31 +278,35 @@ class Preference extends Model
     // 2. sort: i) by manual points in the db, ii) by order tag
     // [tie braker, sort by birthday on the same level
     // https://github.com/laravel/ideas/issues/11;]
-    if (config('kitamatch_config.manual_points')) { // order by manual points
-      // points_manual
-      $applicants = $applicants->sort(function($a, $b) {
-        if($a->points === $b->points) {
-          if($a->birthday === $b->birthday) {
-            return 0;
-           }
-          return $a->birthday < $b->birthday ? -1 : 1; //now, the older will get priority , if we switch +,- then younger will get priority
-        }
-        return $a->points < $b->points ? +1 : -1;
-      });
-    } else {
-      // order
-      $applicants = $applicants->sort(function($a, $b) {
-        if($a->order === $b->order) {
-          if($a->birthday === $b->birthday) {
-            return 0;
-           }
-          return $a->birthday < $b->birthday ? 1 : -1; //now, the older will get priority , if we switch +,- then younger will get priority
-        }
-        return $a->order < $b->order ? -1 : +1;
-      });
-    }
+    $applicants = $applicants->sort(function($a, $b) {
+      if (config('kitamatch_config.manual_points')) {
+          // Sort by points, then by birthday
+          if ($a->points === $b->points) {
+              return $a->birthday < $b->birthday ? -1 : 1;
+          }
+          return $a->points < $b->points ? 1 : -1;
+      } else {
+          // Sort by order, then by birthday
+          if ($a->order === $b->order) {
+              return $a->birthday < $b->birthday ? 1 : -1;
+          }
+          return $a->order < $b->order ? -1 : 1;
+      }
+    });
 
     return $applicants;
+  }
+
+  public function addAdditionalCriteriaBonus($applicant, $provider_id, $criteriaIndex) {
+    $configKey = "kitamatch_config.additionalCriteriaBonus_{$criteriaIndex}";
+    $configValueKey = "kitamatch_config.additionalCriteriaBonus_{$criteriaIndex}_value";
+    $criteriaField = "additionalCriteria_{$criteriaIndex}";
+
+    if (config($configKey)) {
+        if ($applicant->{$criteriaField} == $provider_id) {
+            $applicant->points += config($configValueKey);
+        }
+    }
   }
 
   /**
