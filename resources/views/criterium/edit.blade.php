@@ -3,6 +3,11 @@
 @section('content')
 
 <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+ <!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- jQuery UI -->
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
 
 <div class="row justify-content-center">
     <div class="col-md-8" id="list">
@@ -37,7 +42,7 @@
                 }
             });
             // deactivate
-            .on('click', '.deactivate', function() {
+            $('#sortable').on('click', '.deactivate', function() {
                 $(this).closest('li').remove(); //decativate?!
                 var criteriaId = {'itemId': $(this).closest('li').attr('id')};
                 $.ajax({
@@ -50,7 +55,7 @@
                     });
             });
 
-            $( "tbody" ).disableSelection();
+            $('#sortable').disableSelection();
         });
         </script>
 
@@ -64,7 +69,7 @@
                 <li id="item-{{$criterium->cid}}" class="ui-state-default list-group-item d-flex justify-content-between align-items-center">
                   <span class="ui-icon ui-icon-arrowthick-2-n-s"></span>
                   <span class="col-8">{{$criterium->criterium_value_description}}</span>
-                  <a class="deactivate" href="#list"><span class="badge badge-secondary badge-pill">x</span></a>
+               <!--   <a class="deactivate" href="#list"><span class="badge badge-secondary badge-pill">x</span></a> -->
                 </li>
              @endforeach
         </ul>

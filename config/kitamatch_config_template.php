@@ -17,6 +17,8 @@ return [
   'kita_has_higher_priority' => TRUE,
   // -----------------------------
   'preference_specific_scope' => TRUE,
+  // -----------------------------
+  'update_criteria' => FALSE,
   // MANUEL POINTS
   'manual_points' => TRUE,
   'manual_points_value' => 10,

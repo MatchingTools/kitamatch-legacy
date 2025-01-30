@@ -169,8 +169,9 @@ class ProgramController extends Controller
     foreach ($programs as $program) {
       $total_offer = $this->getTotalOffer($program->pid);
       $programCapacity = $this->getTotalCapacity($program->pid);
+      $occupiedCapacity = $this->countOccupiedCapacity($program->pid);
       $program->provider_name = Provider::where('proid', '=', $program->proid)->first()->name;
-      $program->available_capacity = $programCapacity - $total_offer;
+      $program->available_capacity = $programCapacity - $occupiedCapacity;
       $program->available_applicant = $this->getTotalAvailableApplicant($program->pid);
       $program->process_complete = (min($program->available_capacity, $program->available_applicant) == 0) ? 'Ja' : 'Nein';
       $totalMatches += $total_offer;
@@ -265,8 +266,24 @@ class ProgramController extends Controller
         ->get());
   }
 
-  public function getTotalAvailableApplicant($pid) {
-    $excludedIds = DB::table('matches')
+  public function getTotalUncoordinatedOffer($pid) {
+    $acceptedApplicantIds = $this->getAcceptedApplicants($pid);
+    $uncoordinatedApplicantsIds = DB::table('preferences')
+        ->select('id_to')
+        ->where('program_id', '=', $pid)
+        ->where('id_from', 'like', $pid.'_%')
+        ->where('pr_kind', '=', 3)
+        ->where('status', '=', 1)
+        ->whereNotIn('id_to', $acceptedApplicantIds)
+        ->distinct()
+        ->get()
+        ->pluck('id_to')
+        ->toArray();
+    return $uncoordinatedApplicantsIds;
+  }
+
+  public function getAcceptedApplicants($pid) {
+    $acceptedApplicantIds = DB::table('matches')
       	->select('aid')
         ->whereIn('status', [31, 32])
         ->where('program_id', '=', $pid)
@@ -274,13 +291,28 @@ class ProgramController extends Controller
         ->get()
         ->pluck('aid')
         ->toArray();
+    return $acceptedApplicantIds;
+  }
+
+  public function countOccupiedCapacity($pid) {
+    $uncoordinatedOffers = $this->getTotalUncoordinatedOffer($pid);
+    $acceptedApplicants = $this->getAcceptedApplicants($pid);
+    $mergedArray = array_unique(array_merge($uncoordinatedOffers, $acceptedApplicants));
+    return count($mergedArray);
+  }
+
+  public function getTotalAvailableApplicant($pid) {
+    $acceptedApplicantIds = $this->getAcceptedApplicants($pid);
+    $uncoordinatedApplicantsIds = $this->getTotalUncoordinatedOffer($pid);
+    
+    $mergedIds = array_merge($acceptedApplicantIds, $uncoordinatedApplicantsIds);    
 
     $preferences = DB::table('preferences')
         ->select('id_from', 'program_id')
         ->where('program_id', '=', $pid)
         ->where('pr_kind', '=', 1)
         ->where('status', '=', 1)
-        ->whereNotIn('id_from', $excludedIds)
+        ->whereNotIn('id_from', $mergedIds)
         ->distinct()
         ->get();
     return count($preferences);
