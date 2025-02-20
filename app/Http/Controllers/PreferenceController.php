@@ -166,12 +166,6 @@ class PreferenceController extends Controller
       return redirect()->action('AdminController@index');
     }
 
-  // -----------------------------------------------------------------------------------------------
-  // -----------------------------------------------------------------------------------------------
-  // -----------------------------------------------------------------------------------------------
-  // Applicants
-  // -----------------------------------------------------------------------------------------------
-
   /**
   * Show the feasible set (pr_kind == 0) of an applicant on a view
   *
@@ -683,8 +677,7 @@ class PreferenceController extends Controller
                                                     'countApplicants' => $countApplicants,
                                                     'servicesApplicants' => $servicesApplicants,
                                                     'manualRanking' => $manualRanking,
-                                                    'preferences' => $preferences)
-                  );
+                                                    'preferences' => $preferences));
     }
   }
 
@@ -853,11 +846,6 @@ class PreferenceController extends Controller
 
     return redirect()->action('PreferenceController@showByProgram', $pid);
   }
-
-  // ------------------------------------------------------------------------------------
-  // ------------------------------------------------------------------------------------
-  // ------------------------------------------------------------------------------------
-
 
   /**
   * Create the preferences of all coordinated programs by their corresponding criteria catalogues.

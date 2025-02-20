@@ -316,9 +316,7 @@
               <th>Geschwister betreut</th>
               <th>Geschwister angemeldet</th>
               @endif
-              @if (config('kitamatch_config.manual_points'))
               <th>Punktzahl</th>
-              @endif
               <th>Umfang</th>
               <th>Beginn</th>
               <th>Quartal</th>
