@@ -146,6 +146,7 @@ class AdminController extends Controller
           'first_name' => $applicant->first_name,
           'last_name' => $applicant->last_name,
           'birthday' => $applicant->birthday,
+          'gender' => $applicant->gender,
           'age_cohort' => $age_cohorts[$applicant->age_cohort],
           'care_scope' => $scopes[$applicant->care_scope],
           'care_start' => $starts[$applicant->care_start],
