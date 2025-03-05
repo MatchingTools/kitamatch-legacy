@@ -29,10 +29,11 @@ Route::post('/changePassword','HomeController@changePassword')->name('password.u
 
 //Auth
 Route::auth();
-Route::get('/logout', function () {
-   Auth::logout();
-   return redirect()->back();
-});
+//Route::get('/logout', function () {
+//   Auth::logout();
+//   return redirect()->back();
+//});
+Route::post('/logout', [App\Http\Controllers\Auth\LoginController::class, 'logout'])->name('logout');
 Auth::routes();
 
 //Applicant

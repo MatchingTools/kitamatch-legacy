@@ -1,43 +1,43 @@
 <?php
-/*
- * This file is part of the KitaMatch app.
- *
- * (c) Sven Giegerich <sven.giegerich@mailbox.org>
- *
- * This source file is subject to the MIT license that is bundled
- * with this source code in the file LICENSE.
- */
- /*
- |--------------------------------------------------------------------------
- | Login Controller
- |--------------------------------------------------------------------------
- */
 
 namespace App\Http\Controllers\Auth;
+
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
 
-/**
-* This controller handles authenticating users for the application and redirecting them to the home screen.
-*/
 class LoginController extends Controller
 {
     use AuthenticatesUsers;
 
-    /**
-     * Where to redirect users after login.
-     *
-     * @var string
-     */
     protected $redirectTo = '/home';
 
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
     public function __construct()
     {
         $this->middleware('guest')->except('logout');
+    }
+
+    protected function authenticated(Request $request, $user)
+    {
+        // Generate new session
+        $request->session()->regenerate();
+        
+        // Set session markers
+        $request->session()->put('auth_token', uniqid('auth_', true));
+        $request->session()->put('last_activity', time());
+        
+        return redirect()->intended($this->redirectTo);
+    }
+
+    public function logout(Request $request)
+    {
+        Auth::logout();
+        Session::flush();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        
+        return redirect('/login');
     }
 }

@@ -42,7 +42,14 @@
                 <div class="dropdown-menu dropdown-menu-right dropdown-info" aria-labelledby="navbarDropdownMenuLink-4">
                   <a class="dropdown-item" style="background:#e5e5e5" >{{Auth::user()->email}}</a>
                   <a class="dropdown-item" href="{{ route('password.change')}}">Passwort ändern</a>
-                  <a class="dropdown-item" href="{{url('/logout')}}">Abmelden</a>
+                  <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                      @csrf
+                  </form>
+                  <a class="dropdown-item" href="{{ route('logout') }}"
+                      onclick="event.preventDefault();
+                              document.getElementById('logout-form').submit();">
+                      Abmelden
+                  </a>
                 </div>
               </li>
             @endif
