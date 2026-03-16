@@ -36,44 +36,43 @@
             <div class="form-group row">
                 <label for="name" class="col-sm-2 col-form-label">Gruppenname</label>
                 <div class="col-sm-10">
-                  <input type="text" class="form-control" id="name" name="name" value="{{$program->name}}" disabled>
+                  <input type="text" class="form-control" id="name" name="name" value="{{$program->name}}" >
                 </div>
             </div>
-            <!-- Email but with user-table! -->
-            <div class="form-group row">
-                <label for="capacity" class="col-sm-2 col-form-label">Freie Plätze</label>
+            <div class="form-group row" style="pointer-events: none; opacity: 0.7;">
+                <label for="age_cohort" class="col-sm-2 col-form-label">Altersgruppe</label>
                 <div class="col-sm-10">
-                  <input type="number" min="0" class="form-control" id="capacity" name="capacity" placeholder="10" value="{{$program->capacity}}" disabled>
-                </div>
-            </div>
-
-            <hr class="mb-4 col-md-10">
-
-            <div class="form-group row">
-                <label for="phone" class="col-sm-2 col-form-label">Telefonnummer</label>
-                <div class="col-sm-10">
-                  <input type="text" class="form-control" id="phone" name="phone" placeholder="+49123456789" value="{{$program->phone}}" disabled>
-                </div>
-            </div>
-            <div class="form-group row">
-                <label for="address" class="col-sm-2 col-form-label">Adresse</label>
-                <div class="col-sm-10">
-                  <input type="text" class="form-control" id="address" name="address" placeholder="1234 Main St" value="{{$program->address}}" disabled>
-                </div>
-            </div>
-            <div class="form-group row">
-                <label for="plz" class="col-sm-2 col-form-label">PLZ</label>
-                <div class="col-sm-3">
-                  <input type="text" class="form-control" id="plz" name="plz" placeholder="12345" value="{{$program->plz}}" disabled>
-                </div>
-                <label for="city" class="col-sm-2 col-form-label">Gemeinde</label>
-                <div class="col-sm-5">
-                  <input type="text" class="form-control" id="city" name="city" placeholder="City" value="{{$program->city}}" disabled>
+                  {!! Form::select('age_cohort', array('0' => '---',
+                  '1' => 'U2',
+                  '2' => '2',
+                  '3' => 'Ü3'),
+                                           $program->age_cohort,
+                   array('id' => 'age_cohort', 'class' => 'form-control') )  !!}
                 </div>
             </div>
 
             <hr class="mb-4">
-            <button class="btn btn-primary btn-lg btn-block" type="submit">Änderungen speichern</button>
+
+            <!-- Email but with user-table! -->
+
+            Freie Plätze
+            @foreach (config('kitamatch_config.care_starts') as $care_start_key => $care_start)
+              @foreach (config('kitamatch_config.care_scopes') as $care_scope_key => $care_scope)
+                @if ($care_start_key != -1 and $care_scope_key != -1)
+                <?php $capacity = $capacities->where('care_start', '=', $care_start_key)->where('care_scope', '=', $care_scope_key)->first(); ?>
+                <div class="form-group row">
+                  <label for="capacity" class="col-sm-2 col-form-label">{{$care_start}}, {{$care_scope}}</label>
+                  <div class="col-sm-10">
+                    <input type="number" min="0" class="form-control" id="{{'capacity_' . $capacity->id}}" name="{{'capacity_' . $capacity->id}}" placeholder="" value="{{$capacity->capacity}}">
+                  </div>
+                </div>
+                @endif
+              @endforeach
+            @endforeach
+
+
+            <hr class="mb-4">
+            <button class="btn btn-light btn-lg btn-block" type="submit">Änderungen speichern</button>
         </form>
     </div>
 </div>
@@ -95,7 +94,7 @@
 
         <hr class="mb-4">
 
-        <a href="{{url('/provider/' . $program->proid)}}"><button class="btn btn-primary btn-lg btn-block">Zurück zur Kita</button></a>
+        <a href="{{url('/provider/' . $program->proid)}}"><button class="btn btn-light btn-lg btn-block">Zurück zur Kita</button></a>
         @endif
     </div>
 </div>

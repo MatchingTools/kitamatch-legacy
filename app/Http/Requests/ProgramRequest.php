@@ -39,7 +39,7 @@ class ProgramRequest extends FormRequest
   public function rules() {
     return [
       'name' => 'required|string|min:1',
-      'capacity' => 'required|numeric|min:0|max:200',
+      //'capacity' => 'required|numeric|min:0|max:200',
       'phone' => 'nullable|string|min:6',
       'address' => 'nullable|string|min:4',
       'plz' => 'nullable|numeric|min:5',

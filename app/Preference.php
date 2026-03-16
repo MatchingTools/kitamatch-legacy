@@ -17,6 +17,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use App\Program;
 
 /**
 * This model handles the preferences of programs and applicants
@@ -120,22 +121,79 @@ class Preference extends Model
   * @return Illuminate\Database\Eloquent\Collection applicants
   */
   public function getAvailableApplicants($pid) {
-    /*
-    SELECT applicants.* FROM preferences
-    INNER JOIN applicants ON applicants.aid = preferences.id_from
-    WHERE preferences.id_to = <*6*>
-    WHERE preferences.pr_kind = 1
-    ORDER BY preferences.status
-    */
-
     $applicants = DB::table('preferences')
       ->join('applicants', 'applicants.aid', '=', 'preferences.id_from')
-      ->where('preferences.id_to', '=', $pid)
-      ->where('preferences.status', '=', 1)
-      ->where('preferences.pr_kind', 1)
+      ->where('preferences.program_id', '=', $pid)
+      ->whereIn('preferences.status',  [1, -1])
+      ->where('preferences.pr_kind', '=', 1)
       ->select('applicants.*')
+      ->distinct()
       ->get();
+
     return $applicants;
+  }
+
+  public function getPreferencesByApplicant($aid, $pid){
+    $preferences =DB::table('preferences')
+      ->where('preferences.id_from', '=', $aid)
+      ->where('preferences.program_id','=', $pid)
+      ->where('preferences.status', '=', 1)
+      ->where('preferences.pr_kind', '=', 1)
+      ->get();
+
+    return $preferences;
+  }
+
+  public function getAllPreferencesByApplicantID($aid){
+    $preferences =DB::table('preferences')
+      ->where('preferences.id_from', '=', $aid)
+      ->where('preferences.status', '=', 1)
+      ->where('preferences.pr_kind', '=', 1)
+      ->get();
+
+    return $preferences;
+  }
+
+  public function getPreferenceDetails($college, $student){
+    $preference =DB::table('preferences')
+      ->where('preferences.id_from', '=', $student)
+      ->where('preferences.id_to', '=', $college)
+      ->where('preferences.status', '=', 1)
+      ->where('preferences.pr_kind', '=', 1)
+      ->get();
+
+    return $preference;
+  }
+
+  public function getPreferenceByApplicantAndSid($aid, $sid){
+    $preference =DB::table('preferences')
+    ->where('preferences.id_from', '=', $aid)
+    ->where('preferences.program_id','=', $sid)
+    ->where('preferences.status', '=', 1)
+    ->where('preferences.pr_kind', '=', 1)
+    ->get();
+
+    return $preference;
+  }
+
+  public function getOfferedPreference($id_to, $aid){
+    $offeredPreference =DB::table('preferences')
+      ->where('preferences.id_from','like', $id_to)
+      ->where('preferences.id_to', '=', $aid)
+      ->whereIn('preferences.status', [1, -1])
+      ->get();
+
+    return $offeredPreference;
+  }
+
+  public function getCurrentOfferOfScope($id_to){
+    $currentOffer =DB::table('preferences')
+      ->where('preferences.id_from', 'like', $id_to)
+      ->where('preferences.status', '=', 1)
+      ->whereIn('pr_kind', [2, 3])
+      ->get();
+
+    return $currentOffer;
   }
 
   /**
@@ -143,22 +201,26 @@ class Preference extends Model
   * Adds an additional order attribute to every entry containing the criteria score
   *
   * @param App\Applicant $applicants applicants
-  * @param integer $p_ID Program/Provider-ID
+  * @param integer $p_id Program/Provider-ID
   * @param boolean $provider IsProvider?
   * @return Illuminate\Database\Eloquent\Collection applicants ordered, and with order-attribute (correspoonding criteria-points)
   */
-  public function orderByCriteria($applicants, $p_Id, $provider) {
+  public function orderByCriteria($applicants, $p_id, $provider) {
+    $Program = new Program();
+
     //$provider = true -> criteria from a provider level
     if ($provider) {
-      $criteria = Criterium::where('p_id', '=', $p_Id)
+      $criteria = Criterium::where('p_id', '=', $p_id)
         ->orderBy('rank', 'asc')
         ->get();
+      $provider_id = $p_id;
     } else {
       //single program
-      $criteria = Criterium::where('p_id', '=', $p_Id)
+      $criteria = Criterium::where('p_id', '=', $p_id)
         ->where('program', '=', 1)
         ->orderBy('rank', 'asc')
         ->get();
+      $povider_id = $Program->getProviderId($p_id);
     }
 
     //if criteria is null, use the default order (indicated by providerId = -1)
@@ -168,37 +230,181 @@ class Preference extends Model
       ->get();
     }
 
+    // 1. add order tag
     foreach($applicants as $applicant) {
-      $guardian = Guardian::find($applicant->gid);
+      //$guardian = Guardian::find($applicant->gid);
       $applicant->order = 0;
-      if ($guardian != null) {
+      //if ($guardian != null) {
         foreach($criteria as $criterium) {
           $criterium_name = $criterium->criterium_name;
-          if ($criterium->criterium_value == $guardian->{$criterium_name}) {
+          if ($criterium->criterium_value == $applicant->{$criterium_name}) {
             $applicant->order = $applicant->order + $criterium->rank * $criterium->multiplier;
           }
         }
-      } else {
-        //no guardian -> order = 10000, to order asc
-        $applicant->order = 0;
+
+      // if manual points = TRUE, calculate points if sibiling is within the same institution
+      if (config('kitamatch_config.manual_points')) {
+        if ($applicant->siblings == $provider_id) {
+          $applicant->points = $applicant->points_manual + config('kitamatch_config.manual_points_value');
+        } else {
+          $applicant->points = $applicant->points_manual;
+        }
       }
+
+      //Bonus for first prefered kita
+      if(config('kitamatch_config.preference_bouns')){
+        if ($applicant->first_preference_program == $provider_id) {
+          $applicant->points = $applicant->points + config('kitamatch_config.preference_bouns_value');
+        } else {
+          $applicant->points = $applicant->points;
+        }
+      }
+
+      //Additional Bonus for applicants
+      if(config('kitamatch_config.additionalCriteriaBonus_1')){
+        if ($applicant->additionalCriteria_1 == $provider_id) {
+          $applicant->points = $applicant->points + config('kitamatch_config.additionalCriteriaBonus_1_value');
+        } else {
+          $applicant->points = $applicant->points;
+        }
+      }
+
+      //Additional Bonus for applicants
+      if(config('kitamatch_config.additionalCriteriaBonus_2')){
+        if ($applicant->additionalCriteria_2 == $provider_id) {
+          $applicant->points = $applicant->points + config('kitamatch_config.additionalCriteriaBonus_2_value');
+        } else {
+          $applicant->points = $applicant->points;
+        }
+      }
+      
+      //Additional Bonus for applicants
+      if(config('kitamatch_config.additionalCriteriaBonus_3')){
+        if ($applicant->additionalCriteria_3 == $provider_id) {
+          $applicant->points = $applicant->points + config('kitamatch_config.additionalCriteriaBonus_3_value');
+        } else {
+          $applicant->points = $applicant->points;
+        }
+      }
+
+      //Additional Bonus for applicants
+      if(config('kitamatch_config.additionalCriteriaBonus_4')){
+        if ($applicant->additionalCriteria_4 == $provider_id) {
+          $applicant->points = $applicant->points + config('kitamatch_config.additionalCriteriaBonus_4_value');
+        } else {
+          $applicant->points = $applicant->points;
+        }
+      }
+
+      //Additional Bonus for applicants
+      if(config('kitamatch_config.additionalCriteriaBonus_5')){
+        if ($applicant->additionalCriteria_5 == $provider_id) {
+          $applicant->points = $applicant->points + config('kitamatch_config.additionalCriteriaBonus_5_value');
+        } else {
+          $applicant->points = $applicant->points;
+        }
+      }
+
+      //Additional Bonus for applicants
+      if(config('kitamatch_config.additionalCriteriaBonus_6')){
+        if ($applicant->additionalCriteria_6 == $provider_id) {
+          $applicant->points = $applicant->points + config('kitamatch_config.additionalCriteriaBonus_6_value');
+        } else {
+          $applicant->points = $applicant->points;
+        }
+      }
+
+      //Additional Bonus for applicants
+      if(config('kitamatch_config.additionalCriteriaBonus_7')){
+        if ($applicant->additionalCriteria_7 == $provider_id) {
+          $applicant->points = $applicant->points + config('kitamatch_config.additionalCriteriaBonus_7_value');
+        } else {
+          $applicant->points = $applicant->points;
+        }
+      }
+
+      //Additional Bonus for applicants
+      if(config('kitamatch_config.additionalCriteriaBonus_8')){
+        if ($applicant->additionalCriteria_8 == $provider_id) {
+          $applicant->points = $applicant->points + config('kitamatch_config.additionalCriteriaBonus_8_value');
+        } else {
+          $applicant->points = $applicant->points;
+        }
+      }
+
+      //Additional Bonus for applicants
+      if(config('kitamatch_config.additionalCriteriaBonus_9')){
+        if ($applicant->additionalCriteria_9 == $provider_id) {
+          $applicant->points = $applicant->points + config('kitamatch_config.additionalCriteriaBonus_9_value');
+        } else {
+          $applicant->points = $applicant->points;
+        }
+      }
+
+      //Additional Bonus for applicants
+      if(config('kitamatch_config.additionalCriteriaBonus_10')){
+        if ($applicant->additionalCriteria_10 == $provider_id) {
+          $applicant->points = $applicant->points + config('kitamatch_config.additionalCriteriaBonus_10_value');
+        } else {
+          $applicant->points = $applicant->points;
+        }
+      }
+
+      //Additional Bonus for applicants
+      if(config('kitamatch_config.additionalCriteriaBonus_11')){
+        if ($applicant->additionalCriteria_11 == $provider_id) {
+          $applicant->points = $applicant->points + config('kitamatch_config.additionalCriteriaBonus_11_value');
+        } else {
+          $applicant->points = $applicant->points;
+        }
+      }
+
+      //Additional Bonus for applicants
+      if(config('kitamatch_config.additionalCriteriaBonus_12')){
+        if ($applicant->additionalCriteria_12 == $provider_id) {
+          $applicant->points = $applicant->points + config('kitamatch_config.additionalCriteriaBonus_12_value');
+        } else {
+          $applicant->points = $applicant->points;
+        }
+      }
+
+      //} else {
+        //no guardian -> order = 10000, to order asc
+      //  $applicant->order = 0;
+      //}
       //highly important applicants
       if ($applicant->status == 25) {
         $applicant->order = 2 * 12;
       }
     }
 
-    //tie braker, sort by birthday on the same level
-    //https://github.com/laravel/ideas/issues/11;
-    $applicants = $applicants->sort(function($a, $b) {
-      if($a->order === $b->order) {
-        if($a->birthday === $b->birthday) {
-          return 0;
-         }
-        return $a->birthday < $b->birthday ? -1 : +1;
-      }
-      return $a->order < $b->order ? -1 : +1;
-    });
+    // 2. sort: i) by manual points in the db, ii) by order tag
+    // [tie braker, sort by birthday on the same level
+    // https://github.com/laravel/ideas/issues/11;]
+    if (config('kitamatch_config.manual_points')) { // order by manual points
+      // points_manual
+      $applicants = $applicants->sort(function($a, $b) {
+        if($a->points === $b->points) {
+          if($a->birthday === $b->birthday) {
+            return 0;
+           }
+          return $a->birthday < $b->birthday ? -1 : 1; //now, the older will get priority , if we switch +,- then younger will get priority
+        }
+        return $a->points < $b->points ? +1 : -1;
+      });
+    } else {
+      // order
+      $applicants = $applicants->sort(function($a, $b) {
+        if($a->order === $b->order) {
+          if($a->birthday === $b->birthday) {
+            return 0;
+           }
+          return $a->birthday < $b->birthday ? 1 : -1; //now, the older will get priority , if we switch +,- then younger will get priority
+        }
+        return $a->order < $b->order ? -1 : +1;
+      });
+    }
+
     return $applicants;
   }
 

@@ -23,6 +23,8 @@ use App\Http\Controllers\Controller;
 use App\Criterium;
 use App\Code;
 use App\Preference;
+use App\Program;
+use App\Provider;
 
 /**
 * This controller handles the criteria catalogue: creation, update.
@@ -37,6 +39,13 @@ class CriteriumController extends Controller
   public function __construct() {
     $this->middleware('auth');
   }
+
+public function getDefaultCriteria() {
+  $criteria = Criterium::where('p_id', '=', '-1') // default criteria of municipality
+    ->orderBy('q_order') // order for questions
+    ->get();
+  return $criteria;
+}
 
   /**
   * Show criteria of a provider. If there are no previous entries for the provider, it duplicates the standard criteria catalogue (calls store() with store_type = 1, indicated by index = -1).
@@ -60,9 +69,7 @@ class CriteriumController extends Controller
         ->orderBy('rank', 'desc')
         ->get();
     }
-    foreach ($criteria as $criterium) {
-      $criterium->code_description = Code::where('code', '=', $criterium->criterium_value)->first()->value;
-    }
+
     return view('criterium.edit', array('criteria' => $criteria));
   }
 
@@ -90,9 +97,7 @@ class CriteriumController extends Controller
         ->orderBy('rank', 'desc')
         ->get();
     }
-    foreach ($criteria as $criterium) {
-      $criterium->code_description = Code::where('code', '=', $criterium->criterium_value)->first()->value;
-    }
+
     return view('criterium.edit', array('criteria' => $criteria));
   }
 
@@ -132,6 +137,7 @@ class CriteriumController extends Controller
                 $criterium = new Criterium();
                 $criterium->criterium_name = $defaultCriterium->criterium_name;
                 $criterium->criterium_value = $defaultCriterium->criterium_value;
+                $criterium->criterium_value_description = $defaultCriterium->criterium_value_description;
                 $criterium->rank = $defaultCriterium->rank;
                 $criterium->multiplier = $defaultCriterium->multiplier;
                 $criterium->p_id = $request->p_id;
@@ -162,6 +168,7 @@ class CriteriumController extends Controller
     $criterium = Criterium::find($request->cid);
     if ($request->criterium_name) { $criterium->criterium_name = $request->criterium_name; }
     if ($request->criterium_value) { $criterium->criterium_value = $request->criterium_value; }
+    if ($request->criterium_value_description) { $criterium->criterium_value_description = $request->criterium_value_description; }
     if ($request->rank) { $criterium->rank = $request->rank; }
     if ($request->multiplier) { $criterium->multiplier = $request->multiplier; }
     if ($request->p_id) { $criterium->p_id = $request->p_id; }
@@ -172,17 +179,37 @@ class CriteriumController extends Controller
 
   public function addManualRanking($pid) {
     $Preference = new Preference();
+    $Program = new Program();
+
+    $program = Program::find($pid);
+
+    $providerId = $Program->getProviderId($pid);
+    if ($providerId) {
+      $provider = true;
+      $program->provider_name = Provider::find($providerId)->name;
+    } else {
+      $provider = false;
+    }
     $availableApplicants = $Preference->getAvailableApplicants($pid);
+    // order applicants
+    $availableApplicants = $Preference->orderByCriteria($availableApplicants, $providerId, $provider);
+
+    
 
     //list preferences for each
     $i = 1;
     foreach($availableApplicants as $applicant) {
       $programPref = new Preference();
+      $existing_preference = $programPref->getPreferenceByApplicantAndSid($applicant->aid, $pid);
       $programPref->status = -3;
       $programPref->pr_kind = 3;
       $programPref->id_from = $pid;
       $programPref->id_to = $applicant->aid;
       $programPref->rank = $i;
+      $programPref->isValid = 0;
+      $programPref->invalidReason = "";
+      $programPref->provider_id = $existing_preference[0]->provider_id;;
+      $programPref->program_id = $existing_preference[0]->program_id;;
       $programPref->save();
       $i = $i + 1;
     }

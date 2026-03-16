@@ -30,8 +30,8 @@ class Applicant extends Model
   * @param integer $gid Guardian-ID
   * @return Illuminate\Database\Eloquent\Collection applicants
   */
-  public function getApplicantsByGid($gid) {
-    $applicants = Applicant::where('gid', '=', $gid)->get();
+  public function getApplicantsByUid($uid) {
+    $applicants = Applicant::where('uid', '=', $uid)->get();
     return $applicants;
   }
 
@@ -41,10 +41,10 @@ class Applicant extends Model
   * @param integer $aid Applicant-ID
   * @return integer
   */
-  public function getGuardianIdByApplicant($aid) {
+  /*public function getGuardianIdByApplicant($aid) {
     $applicant = Applicant::where('aid', '=', $aid)->first();
     return $applicant->gid;
-  }
+  }*/
 
   /**
   * Get all applicants with status 22 or 25

@@ -4,22 +4,6 @@
 
 <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
 
-<div class="row justify-content-center pb-3">
-    <div class="col-md-8">
-<ul class="nav nav-pills gap-nav">
-  <li class="nav-item">
-    <a class="nav-link" href="{{url('/guardian/' . $applicant->gid)}}">{{$applicant->gid}}</a>
-  </li>
-  <li class="nav-item">
-    <a class="nav-link" href="{{url('/applicant/' . $applicant->aid)}}">{{$applicant->first_name}} {{$applicant->last_name}}</a>
-  </li>
-  <li class="nav-item">
-    <a class="nav-link active" href="{{url('/preference/applicant/' . $applicant->aid)}}">Präferenzen</a>
-  </li>
-</ul>
-</div>
-</div>
-
 <div class="row justify-content-center">
     <div class="col-md-8">
         @if (count($preferences) < 3)
@@ -29,7 +13,7 @@
         @endif
 
         <!--<h2>{{$applicant->first_name}} {{$applicant->last_name}}: </h2>-->
-        <h2>{{$applicant->first_name}} {{$applicant->last_name}} <small class="text-muted">Rangliste der Wunscheinrichtungen</small></h2>
+        <h2>Rangliste der Wunscheinrichtungen <small class="text-muted">{{$applicant->first_name}} {{$applicant->last_name}} </small></h2>
       </div>
     </div>
 
@@ -58,6 +42,7 @@
     </div>
 </div>
 
+<!-- List of programs -->
 <div class="row justify-content-center">
       @if (count($preferences) > 0)
     <div class="col-md-8">
@@ -125,11 +110,11 @@
         @endif
 </div>
 
-
+<!-- Go Back -->
 <div class="row justify-content-center">
     <div class="col-md-8">
         <hr class="mb-4">
-        <a href="{{url('/applicant/' . $applicant->aid)}}"><button class="btn btn-primary btn-lg btn-block">Stammdaten</button></a>
+        <a href="{{url('/applicant/' . $applicant->aid)}}"><button class="btn btn-primary btn-lg btn-block">Bewerberinformationen</button></a>
     </div>
 </div>
 

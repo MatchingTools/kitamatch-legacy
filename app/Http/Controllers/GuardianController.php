@@ -56,9 +56,9 @@ class GuardianController extends Controller
     $guardian->city = $request->city;
     $guardian->plz = $request->plz;
     $guardian->phone = $request->phone;
-    $guardian->siblings = $request->siblings;
-    $guardian->parental_status = $request->parentalStatus;
-    $guardian->volume_of_employment = $request->volumeOfEmployment;
+    //$guardian->siblings = $request->siblings;
+    //$guardian->parental_status = $request->parentalStatus;
+    //$guardian->volume_of_employment = $request->volumeOfEmployment;
     $guardian->save();
     return $guardian;
   }
@@ -119,9 +119,9 @@ class GuardianController extends Controller
     if ($request->city) { $guardian->city = $request->city; }
     if ($request->plz) { $guardian->plz = $request->plz; }
     if ($request->phone) { $guardian->phone = $request->phone; }
-    if ($request->siblings) { $guardian->siblings = $request->siblings; }
-    if ($request->parentalStatus) { $guardian->parental_status = $request->parentalStatus; }
-    if ($request->volumeOfEmployment) { $guardian->volume_of_employment = $request->volumeOfEmployment; }
+    //if ($request->siblings) { $guardian->siblings = $request->siblings; }
+    //if ($request->parentalStatus) { $guardian->parental_status = $request->parentalStatus; }
+    //if ($request->volumeOfEmployment) { $guardian->volume_of_employment = $request->volumeOfEmployment; }
     $guardian->save();
     return $guardian;
   }
@@ -137,7 +137,7 @@ class GuardianController extends Controller
       $user = User::where('id', '=', $guardian->uid)->first();
       $guardian->email = $user->email;
       $guardian->status_description = Code::where('code', '=', $guardian->status)->first()->value;
-      $siblings_description = Code::where('code', '=', $guardian->siblings)->first();
+      /*$siblings_description = Code::where('code', '=', $guardian->siblings)->first();
       $parental_status_description = Code::where('code', '=', $guardian->parental_status)->first();
       $volume_of_employment_description = Code::where('code', '=', $guardian->volume_of_employment)->first();
       if ($siblings_description) {
@@ -154,7 +154,7 @@ class GuardianController extends Controller
         $guardian->volume_of_employment_description = $volume_of_employment_description->value;
       } else {
         $guardian->volume_of_employment_description = "--";
-      }
+      }*/
     }
     return view('guardian.all', array('guardians' => $guardians));
   }
