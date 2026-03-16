@@ -76,19 +76,19 @@ class ProgramController extends Controller
       $accountType = 2;
     }
 
-    $requestUser->request->add([
+    /*$requestUser->request->add([
       'email' => $request->email,
       'password' => app('App\Http\Controllers\Auth\RegisterController')->generateStrongPassword(),
       'account_type' => $accountType
     ]);
-    $user = app('App\Http\Controllers\Auth\RegisterController')->storeByProvider($requestUser);
+    $user = app('App\Http\Controllers\Auth\RegisterController')->storeByProvider($requestUser);*/
     //store the program
     $request->request->add([
       'p_kind' => $p_kind,
-      'proid' => $proid,
-      'uid' => $user->id,
+      'proid' => $proid
     ]);
-    $this->store($request);
+    $program = $this->store($request);
+
     return redirect()->action('ProviderController@show', $proid);
   }
 
@@ -107,6 +107,7 @@ class ProgramController extends Controller
     $program->address = $request->address;
     $program->capacity = $request->capacity;
     $program->p_kind = $request->p_kind;
+    $program->age_cohort = $request->age_cohort;
     $program->coordination = $request->coordination;
     if (!$request->coordination) { $program->coordination = 0; }
     if ($program->p_kind == 1) { $program->coordination = 1; }
@@ -146,7 +147,14 @@ class ProgramController extends Controller
   */
   public function show($pid) {
     $program = Program::find($pid);
-    return view('program.edit', array('program' => $program));
+
+    if (!app('App\Http\Controllers\CapacityController')->hasProgramCapacity($pid)) {
+      // create capacity entries
+      app('App\Http\Controllers\CapacityController')->storeByProgram($program->pid);
+    }
+
+    $capacities = app('App\Http\Controllers\CapacityController')->getProgramCapacities($pid);
+    return view('program.edit', array('program' => $program, 'capacities' => $capacities));
   }
 
   /**
@@ -175,7 +183,8 @@ class ProgramController extends Controller
   public function edit(ProgramRequest $request, $pid) {
     $request->request->add(['pid' => $pid]);
     $program = $this->update($request);
-    return view('program.edit', array('program' => $program));
+    $capacities = app('App\Http\Controllers\CapacityController')->updateByProgram($request);
+    return redirect()->action('ProgramController@show', ['pid' => $pid]);
   }
 
   /**
@@ -189,6 +198,7 @@ class ProgramController extends Controller
     $program->name = $request->name;
     $user = User::where('id', '=', $program->uid)->first();
     $program->coordination = $request->coordination;
+    $program->age_cohort = $request->age_cohort;
     //p_kind = 1, so coordination needs to be 1
     if (!$request->coordination) { $program->coordination = 0; }
     if ($program->p_kind == 1) { $program->coordination = 1; }

@@ -29,6 +29,7 @@ use App\Matching;
 use App\Applicant;
 use App\Program;
 use App\Preference;
+use App\Capacity;
 use App\Traits\GetPreferences;
 use App\Mail\ApplicantMatch;
 use App\Mail\ProgramMatch;
@@ -93,7 +94,7 @@ class MatchingController extends Controller
     $Preference = new Preference;
     $Matching = new Matching;
 
-    $input = $this->prepareMatching();
+    $input = $this->prepareMatching2();
 
     //null=4
     if (!(strlen(json_encode($input))>5)) {
@@ -101,6 +102,7 @@ class MatchingController extends Controller
     }
     print_r(json_encode($input));
     echo "<br><br><br><br><br><br>";
+
 
     //GuzzleHttp\Client
     $client = new Client();
@@ -130,6 +132,7 @@ class MatchingController extends Controller
     $result = json_decode($response->getBody(), true);
     $matchingResult = $result['hri_matching'];
 
+    print("Results:");
     print_r($result);
 
     //temp: set active = 0 for all previous entries != final
@@ -138,8 +141,8 @@ class MatchingController extends Controller
     $Preference->resetUncoordinatedOffers();
 
     foreach ($matchingResult as $match) {
-      $college = (int)$match['college.y'];
-      $student = (int)$match['student.y'];
+      $college = $match['college'];
+      $student = $match['student'];
       $matchRequest = new Request();
       $matchRequest->setMethod('POST');
       $matchRequest->request->add(['college' => $college,
@@ -147,87 +150,50 @@ class MatchingController extends Controller
                                  ]);
 
       //check if program is uncoordinated
-      $coordination = $Program->isCoordinated((int)$match['college.y']);
+      $coordination = $Program->isCoordinated($match['college']);
+      // is uncoordianted
+
+      print("---------- <br>");
+
       if ($coordination == 0) {
-        $preferencesUncoordinated = $this->getPreferencesUncoordinatedByProgram((int)$match['college.y']);
+        $preferencesUncoordinated = $this->getPreferencesByUncoordinatedService($match['college']);
+
         foreach ($preferencesUncoordinated as $preference) {
-          if ($preference->id_to == (int)$match['student.y']) {
-            $Preference->updateStatus($preference->prid, 1);
+          if ($preference->id_to == $match['student']) {
+            $Preference->updateStatus($preference->prid, 1); 
             $Preference->updateRank($preference->prid, 1);
+            
           }
         }
       }
 
+      # LOOK at every applicant that is in the matchingResults
+      # for every pref that is below this rank for this applicant, and not status -1 already, set status to -3
+      # for every pref that is below this rank for this applicant, set status -1
+      $preferences = $Preference->getAllPreferencesByApplicantID($student);
+      $college_preference = $Preference->getPreferenceDetails($college, $student);
+
+      foreach($preferences as $preference){
+        if($college != $preference->id_to && $college_preference[0]->rank < $preference->rank && $preference->status != -1){
+          $Preference->updateStatus($preference->prid, -1); 
+        }
+      }
+
       //check if it's the final match
-      if ((int)$match['college.y'] == (int)$input['student_prefs'][(int)$match['student.y']][0]) {
+      if ($match['college'] == $input['student_prefs'][$match['student']][0]) {
         $matchRequest->request->add(['status' => 32]);
         $this->store($matchRequest);
         //set applicant status to matched
-        app('App\Http\Controllers\ApplicantController')->setFinalMatch($match['student.y']);
+        app('App\Http\Controllers\ApplicantController')->setFinalMatch($match['student']);
 
         //for the queues, update all uncoordinated prefs to -1
-        $Preference->resetAllUncoordnatedQueuesByApplicant($student, $college);
+      //  $Preference->resetAllUncoordnatedQueuesByApplicant($student, $college);
 
       } else {
         $matchRequest->request->add(['status' => 31]);
         $this->store($matchRequest);
       }
     }
-
-    /*
-
-
-
-
-    $Preference->resetUncoordinated();
-
-    //store the positiv matches
-    foreach ($matchingResult as $match) {
-      $matchRequest = new Request();
-      $matchRequest->setMethod('POST');
-      $matchRequest->request->add(['college' => (int)$match['college.y'],
-                                   'student' => (int)$match['student.y']
-                                 ]);
-
-      //check if it's a match on the waitlist, if update preference to rank = 1
-
-      $preference = Preference::where('id_from', '=', 9)
-        ->where('id_to', '=', (int)$match['college.y'])
-        ->where('pr_kind', "=", 3)
-        ->where('rank', '>', 1)
-        ->get();
-      if ($preference->count() != 0) {
-        echo "ranked";
-        $preference = $preference->first();
-        $preference->rank = 1;
-        $preference->save();
-      }
-
-      //check if it's the final match
-      if ((int)$match['college.y'] == (int)$input['student_prefs'][(int)$match['student.y']][0]) {
-        $matchRequest->request->add(['status' => 32]);
-        $this->store($matchRequest);
-        //set applicant status to matched
-        app('App\Http\Controllers\ApplicantController')->setFinalMatch($match['student.y']);
-      } else {
-        $matchRequest->request->add(['status' => 31]);
-        $this->store($matchRequest);
-      }
-
-      //check if program is uncoordinated
-      $coordination = $Program->isCoordinated((int)$match['college.y']);
-      if ($coordination == 0) {
-        // if then update prefs back to 1
-        $preferencesUncoordinated = $this->getPreferencesUncoordinatedByProgram((int)$match['college.y']);
-        foreach ($preferencesUncoordinated as $preference) {
-          //only for this specific match
-          if ((int)$preference->id_to == (int)$match['student.y']) {
-            $Preference->updateStatus($preference->prid, 1);
-          }
-        }
-      }
-    }*/
-    //return redirect()->action('AdminController@index');
   }
 
 
@@ -370,6 +336,87 @@ print_r($capacityList);
 print("<br><br>");
 
     return ($json);
+  }
+
+  public function prepareMatching2() {
+    $Preference = new Preference;
+    $Capacity = new Capacity;
+    $Applicant = new Applicant;
+    $Matching = new Matching;
+    $json = array();
+
+
+    // Applicants ------------------
+    $preferencesApplicants = array();
+    $applicants = $Applicant->getAll();
+
+    foreach ($applicants as $applicant) {
+      $preferencesByApplicant = $this->getServicesByApplicant($applicant->aid);
+      $preferenceList = array();
+      foreach ($preferencesByApplicant as $preference) {
+        $preferenceList[] = (string)$preference->id_to;
+      }
+      //check if there are any preferences
+      if (count($preferenceList) > 0) {
+        $preferencesApplicants[$applicant->aid] = $preferenceList;
+      }
+    }
+    if (count($preferencesApplicants) > 0) {
+      $json["student_prefs"] = $preferencesApplicants;
+    }
+
+    // Services ------------------
+    $preferencesServices = array();
+    $capacities = array();
+    $services = DB::table('preferences')->select('id_from')
+      ->whereIn('pr_kind', [2,3])
+      ->where('status', '=', 1)
+      ->distinct()
+      ->get();
+    $preferencesByServices = DB::table('preferences')->whereIn('pr_kind', [2,3])
+      ->where('status', '=', 1)
+      ->orderBy('rank', 'asc')
+      ->get();
+
+    foreach($services as $service) {
+      $i = 0;
+      $preferencesByService = $preferencesByServices->where('id_from', '=', $service->id_from);
+      foreach ($preferencesByService as $pref) {
+        if (count($applicants->where('aid', '=', $pref->id_to)) > 0) { //applicant with status 22/25
+          $preferencesServices[$service->id_from][$i] = $pref->id_to;
+          $i++;
+        }
+      }
+
+      $capacities[$service->id_from] = $Capacity->getCapacity($service->id_from);
+    }
+    $json['college_prefs'] = $preferencesServices;
+    $json['college_capacity'] = $capacities;
+
+    // Last Matching ------------------
+    /*$lastMatchDate = $Matching->lastMatch();
+    $lastMatchTime = strtotime($lastMatchDate);
+    $lastMatchTime = $lastMatchTime - (1 * 60); // minus 1 minute
+    $lastMatchDate = date("Y-m-d H:i:s", $lastMatchTime);
+    $matches = DB::table('matches')
+      ->where('updated_at', '>=', $lastMatchDate)
+      ->get();
+
+    $matching = array();
+    foreach($matches as $id => $match) {
+      $matching[$match->mid]['student'] = $match->aid;
+      $matching[$match->mid]['college'] = $match->pid;
+    }
+    $json['matching'] = $matching;*/
+
+    // ----------
+
+    // If no information, return NULL
+    if ($preferencesByServices->count() == 0 || count($preferencesApplicants) == 0) {
+      return;
+    }
+
+    return($json);
   }
 
 }

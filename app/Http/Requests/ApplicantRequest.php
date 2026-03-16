@@ -38,10 +38,11 @@ class ApplicantRequest extends FormRequest
   */
   public function rules() {
     return [
-      'firstName' => 'required|string|min:2',
-      'lastName' => 'required|string|min:2',
+      //'firstName' => 'required|string|min:2',
+      //'lastName' => 'required|string|min:2',
       'birthday' => 'required|date|date_format:Y-m-d',
       'gender' => 'required|string',
+      'age_cohort' => 'required'
     ];
   }
 }

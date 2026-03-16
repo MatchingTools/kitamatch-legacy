@@ -51,7 +51,7 @@
               <li>Bestätigte Bewerber</li>
               <li>Registrierte Bewerber</li>
             </ul>
-            <a href="{{url('/guardian/all')}}"><button type="button" class="btn btn-lg btn-block btn-outline-primary">Bewerber</button></a>
+            <a href="{{url('/applicant/all')}}"><button type="button" class="btn btn-lg btn-block btn-outline-primary">Bewerber</button></a>
           </div>
         </div>
         <div class="card mb-4 box-shadow">
@@ -70,26 +70,39 @@
       </div>
 
 <div class="row justify-content-center">
-    <div class="col-md-6">
-      <br>
-      <a target="_blank" href="{{url('/matching/get')}}"><button class="btn btn-primary btn-lg btn-block">Vergabe starten</button></a>
-      <br>
-      <br>
-    </div>
-    </div>
+  <div class="col-md-6">
+          <br>
+          @if (!$data['isSet'])
+          <a target="_blank" href="{{url('/preference/set')}}"><button class="btn btn-primary btn-lg btn-block">Ranglisten einrasten</button></a>
+          @else
+          <button class="btn btn-light btn-lg btn-block" disabled>Ranglisten eingerastet</button>
+          @endif
+        </div>
+      </div>
 
 <div class="row justify-content-center">
-  <div class="col-md-8">
-    <h4><span class="badge badge-light badge-admin">{{count($matches)}}</span> Zuordnungen, <span class="badge badge-light badge-admin">{{$data['countRounds']}}.</span> Koordinierungsrunde</h4>
+  <div class="col-md-6">
+    <br>
+    <a target="_blank" href="{{url('/matching/get')}}"><button class="btn btn-primary btn-lg btn-block">Vergabe starten</button></a>
+    <br>
+    <br>
   </div>
 </div>
 
 <div class="row justify-content-center">
-  <div class="col-md-10 my-3 p-3 bg-white rounded box-shadow">
+  <div class="col-md-8">
+    <h4><span class="badge badge-light badge-admin">{{count($matches)}}</span> Zuordnungen, <span class="badge badge-light badge-admin">{{$data['countRounds']}}.</span> Koordinierungsrunde, <a class="btn btn-warning" target="_blank" href="{{url('/admin/exportAssigned')}}">Export</a></h4>
+  </div>
+</div>
+
+<div class="row justify-content-center">
+  <div class="col-md-12 my-3 p-3 bg-white rounded box-shadow">
         <table class="table" id="matches">
             <thead>
                 <tr>
                     <th>Kita</th>
+                    <th>Beginn</th>
+                    <th>Umfang</th>
                     <th>Kitagruppe</th>
                     <th>Bewerber</th>
                     <th>Status</th>
@@ -99,8 +112,10 @@
                 @foreach($matches as $match)
                     <tr>
                       <td>{{$match->provider_name}}</td>
+                      <td>{{$match->start}}</td>
+                      <td>{{$match->scope}}</td>
                       <td><a target="_blank" href="{{url('/preference/program/' . $match->pid )}}">{{$match->program_name}}</a></td>
-                      <td><a target="_blank" href="{{url('/preference/applicant/' . $match->aid )}}'">{{$match->applicant_name}}</a></td>
+                      <td><a target="_blank" href="{{url('/applicant/' . $match->aid )}}">{{$match->applicant_name}}</a></td>
                       <td>{{$match->status_text}}</td>
                     </tr>
                 @endforeach
@@ -112,7 +127,7 @@
 @if($data['countRounds'] > 1)
 <div class="row justify-content-center pt-5">
   <div class="col-md-8">
-    <h4><span class="badge badge-light badge-admin">{{$data['applicantsVerified'] - count($matches)}}</span> Nicht zugeordnete Bewerber</h4>
+    <h4><span class="badge badge-light badge-admin">{{$data['applicantsVerified'] - count($matches)}}</span> Nicht zugeordnete Bewerber, <a class="btn btn-warning" target="_blank" href="{{url('/admin/exportUnassigned')}}">Export</a></h4>
   </div>
 
   <div class="col-md-10 my-3 p-3 bg-white rounded box-shadow">
@@ -121,7 +136,9 @@
                 <tr>
                     <th>Name</th>
                     <th>Geburtsdatum</th>
+                    @if (config('kitamatch_config.show_gender'))
                     <th>Geschlecht</th>
+                    @endif
                 </tr>
             </thead>
             <tbody>
@@ -129,7 +146,9 @@
                     <tr>
                       <td>{{$nonMatch['first_name']}} {{$nonMatch['last_name']}}</td>
                       <td>{{(new Carbon\Carbon($nonMatch['birthday']))->format('d.m.Y')}}</td>
+                      @if (config('kitamatch_config.show_gender'))
                       <td>{{$nonMatch['gender']}}</td>
+                      @endif
                     </tr>
               @endforeach
             </tbody>
@@ -137,14 +156,5 @@
     </div>
 </div>
 @endif
-
-<div class="row justify-content-center">
-    <div class="col-md-6">
-<br>
-<a href="{{url('/admin/reset')}}"><button class="btn btn-light btn-lg btn-block">Datenbank zurücksetzen</button></a>
-<small style="float: right;">(Manuelle Kitarangliste geht dabei verloren)</small>
-</div>
-</div>
-
 
 @endsection

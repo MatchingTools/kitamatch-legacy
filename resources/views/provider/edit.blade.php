@@ -52,7 +52,7 @@
             </div>
 
             <hr class="mb-4">
-            <button class="btn btn-primary btn-lg btn-block" type="submit">Aktualisieren</button>
+            <button class="btn btn-light btn-lg btn-block" type="submit">Aktualisieren</button>
         </form>
     </div>
 </div>
@@ -69,7 +69,7 @@
             <br>
         @endforeach
 
-        <a href="{{url('/program/add/' . $provider->proid)}}"><button class="btn btn-primary btn-lg btn-block">Gruppe hinzufügen</button></a>
+        <a href="{{url('/program/add/' . $provider->proid)}}"><button class="btn btn-light btn-lg btn-block">Gruppe hinzufügen</button></a>
         <br>
     </div>
 </div>
@@ -80,7 +80,7 @@
     <div class="col-md-8">
         <h4>Kriterien</h4>
         <br>
-        <a href="{{url('/criteria/' . $provider->proid)}}"><button class="btn btn-primary btn-lg btn-block">Zum Kriterienkatalog</button></a>
+        <a href="{{url('/criteria/' . $provider->proid)}}"><button class="btn btn-light btn-lg btn-block" disabled>Zum Kriterienkatalog</button></a>
         <br>
     </div>
 </div>

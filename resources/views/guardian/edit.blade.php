@@ -69,41 +69,6 @@
                   <input type="text" class="form-control" id="city" name="city" placeholder="City" value="{{$guardian->city}}">
                 </div>
             </div>
-            <div class="form-group row">
-                <label for="address" class="col-sm-2 col-form-label">Geschwisterkind?</label>
-                <div class="col-sm-10">
-                    {!! Form::select('siblings', array('840' => 'No',
-                                                       '841' => 'Yes'),
-                        $guardian->siblings,
-                        array('id' => 'siblings',
-                              'class' => 'form-control')
-                    )  !!}
-                </div>
-            </div>
-            <div class="form-group row">
-                <label for="parentalStatus" class="col-sm-2 col-form-label">Elternstatus</label>
-                <div class="col-sm-10">
-                    {!! Form::select('parentalStatus', array('822' => 'Ein(e) Erziehungsberechtigte(r) ist beschäftigt',
-                                                            '821' => 'Beide Erziehungsberechtigten sind beschäftigt',
-                                                            '820' => 'Alleinerziehend und beschäftigt',
-                                                            '823' => 'Alleinerziehend ohne Beschäftigung'),
-                                                            $guardian->parental_status,
-                    array('id' => 'parentalStatus', 'class' => 'form-control') )  !!}
-                </div>
-            </div>
-            <div class="form-group row">
-                <label for="volumeOfEmployment" class="col-sm-2 col-form-label">Beschäftigungsumfang</label>
-                <div class="col-sm-10">
-                    {!! Form::select('volumeOfEmployment', array('833' => 'ohne Beschäftigung',
-                                                                        '832' => '8-15 Stunden/Woche',
-                                                                        '831' => '16-27 Stunden/Woche',
-                                                                        '830' => 'ab 28 Stunden/Woche'),
-                                                                        $guardian->volume_of_employment,
-                    array('id' => 'volumeOfEmployment', 'class' => 'form-control') )  !!}
-
-                </div>
-            </div>
-
             <hr class="mb-4">
             <button class="btn btn-primary btn-lg btn-block" type="submit">
               @if (strlen($guardian->last_name)>0)
@@ -125,6 +90,8 @@
             <a href="{{url('/applicant/' . $applicant->aid)}}"><button class="btn btn-primary btn-lg btn-block">{{$applicant->first_name}} {{$applicant->last_name}}</button></a>
             <br>
         @endforeach
+
+        <hr class="mb-4">
 
           <a href="{{url('/applicant/add/' . $guardian->gid)}}"><button class="btn-primary btn-lg btn-block">Bewerber hinzufügen</button></a>
         <br>

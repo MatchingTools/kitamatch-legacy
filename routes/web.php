@@ -1,4 +1,7 @@
 <?php
+if(version_compare(PHP_VERSION, '7.2.0', '>=')) {
+   error_reporting(E_ALL ^ E_NOTICE ^ E_WARNING);
+}
 
 /*
 |--------------------------------------------------------------------------
@@ -15,20 +18,22 @@ Route::get('/', 'HomeController@index', function(){
    return View::make("welcome");
 });
 Route::get('/home', 'HomeController@index')->name('home');
+Route::get('/changePassword','HomeController@showChangePasswordForm')->name('password.change');
+Route::post('/changePassword','HomeController@changePassword')->name('password.update');
 
 //Auth
 Route::auth();
 Route::get('/logout', function () {
    Auth::logout();
-   return redirect('/');
+   return redirect()->back();
 });
 Auth::routes();
 
 //Applicant
 Route::get('/applicant', 'ApplicantController@all');
 Route::get('/applicant/all', 'ApplicantController@all');
-Route::get('/applicant/add/{gid}', 'ApplicantController@add');
-Route::post('/applicant/add/{gid}', 'ApplicantController@create');
+Route::get('/applicant/add', 'ApplicantController@add');
+Route::post('/applicant/add', 'ApplicantController@create');
 Route::get('/applicant/{applicant}', 'ApplicantController@show');
 Route::post('/applicant/{applicant}', 'ApplicantController@edit');
 Route::delete('/applicant/{applicant}', 'ApplicantController@delete');
@@ -54,6 +59,8 @@ Route::post('/preference/applicant/{aID}', 'PreferenceController@addByApplicant'
 Route::post('/preference/applicant/reorder/{aID}', 'PreferenceController@reorderByApplicantAjax');
 Route::post('/preference/applicant/delete/{aID}', 'PreferenceController@deleteByApplicantAjax');
 Route::delete('/preference/applicant/{prID}', 'PreferenceController@deleteByApplication');
+
+Route::get('preference/set', 'PreferenceController@setPreferences');
 // ------ By Program - coordinated
 Route::get('/preference/program/{pID}', 'PreferenceController@showByProgram');
 Route::post('/preference/program/{pID}', 'PreferenceController@addByProgram');
@@ -68,7 +75,7 @@ Route::post('/preference/program/uncoordinated/offer/{pID}', 'PreferenceControll
 Route::post('/preference/program/uncoordinated/waitlist/{pID}', 'PreferenceController@addWaitlistUncoordinatedProgram');
 Route::post('/preference/program/uncoordinated/reorder/{pID}', 'PreferenceController@reorderWaitlistByProgramAjax');
 Route::post('/preference/program/uncoordinated/upoffer', 'PreferenceController@updateOfferUncoordinatedProgram');
-Route::delete('/preference/program/uncoordinated/{aID}', 'PreferenceController@deleteByProgram');
+Route::delete('/preference/program/uncoordinated/{prID}', 'PreferenceController@deleteByProgram');
 // ------ All
 Route::get('/preference/all', 'PreferenceController@all');
 
@@ -85,6 +92,7 @@ Route::post('/provider/{proid}', 'ProviderController@edit');
 //Matchings
 Route::get('/matching/all', 'MatchingController@all');
 Route::get('/matching/json', 'MatchingController@createJson');
+
 Route::get('/matching/get', 'MatchingController@findMatchings');
 
 //Criteria
@@ -100,3 +108,5 @@ Route::get('/admin/', 'AdminController@index');
 Route::get('/admin/dashboard', 'AdminController@index');
 Route::get('/admin/export', 'AdminController@exportMatching');
 Route::get('/admin/reset', 'AdminController@resetDB');
+Route::get('/admin/exportAssigned', 'AdminController@exportAssignedApplicants');
+Route::get('/admin/exportUnassigned', 'AdminController@exportUnassignedApplicants');
