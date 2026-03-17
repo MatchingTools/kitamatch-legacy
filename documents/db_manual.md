@@ -1,5 +1,7 @@
 # KitaMatch - Database Manual
 
+*Deprecated!*
+
 ## EER Diagram
 ![alt text](db_eer_diagram.png "EER Diagram")
 
@@ -38,12 +40,17 @@ Matching class mainly handles the API calls.
 Preference class maintains preferences in two-directions, from applicant to program and from program to applicant.
 ### Codes
 #### pr_kind
+* 0: aplicant's feasible set of childcare institutions
 * 1: applicant to program
 * 2: coordinated program to applicant
 * 3: uncoordinated program to applicant
 #### Status Codes
 * -2: manually deleted
 * -1: historic (preference not reciprocated)
+* 0: not valid
+* 1: valid
+#### isValid 
+-Shows the validity of the preference after each matching round
 * 0: not valid
 * 1: valid
 
@@ -64,19 +71,35 @@ Guardians maintain the social master data required for the coordination and hols
 ## Criteria
 ### Codes
 #### parental_status
-* 820: Eine/Ein Alleinerziehende/r beschäftig
-* 821: Beide Erziehungsberechtigte beschäftigt
-* 822: Ein Erziehungsberechtigter beschäftigt
-* 823: Alleinerziehend ohne Beschäftigung
-* 824: Sonstig
+* 0:  Neutral
+* 820: Hoch (Eine/Ein Alleinerziehende/r beschäftigt)
+* 821: Mittel (Beide Erziehungsberechtigte beschäftigt
+* 822: Niedrig (Ein Erziehungsberechtigter beschäftigt)
+
 #### volume_of_employment
-* 830: Ganztags (ab 28 h/Woche)
-* 831: Halbtags (ab 16-27 h/Woche)
-* 832: Geringfügig (ab 8-15 h/Woche)
-* 833: Ohne Beschäftigung
+* 0:  Neutral
+* 830: Hoch (Ganztags, ab 28 h/Woche)
+* 831: Mittel (Halbtags, ab 16-27 h/Woche)
+* 832: Niedrig (Geringfügig, ab 8-15 h/Woche)
+
 #### siblings
-* 840: Kein Geschwisterkind
-* 841: Geschwisterkind
+* 0:  Neutral
+* 840: Kein Geschwisterkind (Nein)
+* 841: Geschwisterkind (Ja)
+* Manual Points: Provider-Id of the sibling
+
+#### religion
+* 0:  Neutral
+* 850: Konfessionslos
+* 851: Katholisch
+* 852: Evangelisch
+* 853: Muslimisch
+* 854: Jüdisch
+* 855: Andere
+
+#### change_request
+* 860: Ja
+* 861: Nein
 
 ## User
 ### Codes

@@ -27,10 +27,6 @@
             <th>Status</th>
             <th>PLZ</th>
             <th>Telefonnummer</th>
-            <th>Geschwisterkind</th>
-            <th>Elternstatus</th>
-            <th>Beschäftigungsumfang</th>
-            <th>Verifikation</th>
         </tr>
       </thead>
         <tbody>
@@ -46,17 +42,6 @@
                 <td>{{$guardian->status_description}}</td>
                 <td>{{$guardian->plz}}</td>
                 <td>{{$guardian->phone}}</td>
-                <td>{{$guardian->siblings_description}}</td>
-                <td>{{$guardian->parental_status_description}}</td>
-                <td>{{$guardian->volume_of_employment_description}}</td>
-                <td>
-                    @if ( ($guardian->status == 50 OR $guardian->status == 51) && ($guardian->siblings_description != "--" && $guardian->parental_status_description != "--" && $guardian->volume_of_employment_description != "--"))
-                    <form action="{{url('/guardian/verify/' . $guardian->gid)}}" method="POST">
-                        {{ csrf_field() }}
-                        <button class="">Verify</button>
-                    </form>
-                    @endif
-                </td>
             </tr>
         @endforeach
       </tbody>

@@ -19,7 +19,7 @@
 </div>
 <div class="row justify-content-center">
     <div class="col-md-6  my-3 p-3 bg-white rounded box-shadow">
-        <form action="{{url('/applicant/add/' . $guardian->gid)}}" method="POST" class="">
+        <form action="{{url('/applicant/add/'}}" method="POST" class="">
             {{ csrf_field() }}
 
             <div class="form-group row">

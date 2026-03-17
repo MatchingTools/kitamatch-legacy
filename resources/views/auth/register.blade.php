@@ -55,7 +55,7 @@
 
                             <div class="col-md-6">
                                 <select id="account-type" class="form-control" name="accountType" required>
-                                    <option value="1">Erziehungsberechtigter</option>
+                                    <option value="1">Bewerber</option>
                                     <!--<option value="2">Öffentliche Kita</option>-->
                                     <!--<option value="3">Private Kita</option>-->
                                     <option value="4">Kindertagesstätte</option>
@@ -63,8 +63,8 @@
                             </div>
 
                         </div>
-                        <div class="form-group row mb-0">
-                            <div class="col-md-6 offset-md-4">
+                        <!-- <div class="form-group row mb-0"> -->
+                            <!-- <div class="col-md-6 offset-md-4">
                               <div class="g-recaptcha" data-sitekey="{{env('GOOGLE_RECAPTCHA_KEY')}}"></div>
                               @if ($errors->has('g-recaptcha-response'))
                                   <span class="invalid-feedback" style="display: contents;">
@@ -73,7 +73,7 @@
                               @endif
                               <br>
                             </div>
-                          </div>
+                          </div> -->
 
                         <div class="form-group row mb-0">
                             <div class="col-md-6 offset-md-4">

@@ -28,7 +28,6 @@
         <tr>
             <th>Kita</th>
             <th>Gruppe</th>
-            <th>Freie Plätze</th>
             <!--<th>Adresse</th>
             <th>PLZ</th>-->
             <th>Öffentlich / Frei</th>
@@ -41,7 +40,6 @@
             <tr>
                 <td><a href="{{url('/provider/' . $program->proid)}}">{{$program->provider_name}}</a></td>
                 <td><a href="{{url('/preference/program/' . $program->pid)}}">{{$program->name}}</a></td>
-                <td>{{$program->capacity}}</td>
                 <!--<td>{{$program->address}}</td>
                 <td>{{$program->plz}}</td>-->
                 <td>{{$program->p_kind_description}}</td>
